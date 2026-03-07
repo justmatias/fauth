@@ -240,6 +240,99 @@ app.include_router(auth.create_router(prefix="/auth"))
 
 ---
 
+### Testing Utilities (Consumer Test Helpers)
+
+A dedicated `fauth.testing` sub-package that ships fake implementations of the library's protocols and a pre-wired `AuthProvider` factory, so consumers can write unit tests without real JWTs, password hashing, or database calls.
+
+#### [NEW] src/fauth/testing/\_\_init\_\_\.py
+
+Public re-exports: `FakeUserLoader`, `FakeTokenBlacklist`, `fake_auth_config`, `fake_auth_provider`.
+
+#### [NEW] src/fauth/testing/config.py
+
+```python
+def fake_auth_config(**overrides) -> AuthConfig:
+    """Returns an AuthConfig with safe test defaults (fixed secret, short expiry)."""
+    defaults = {
+        "secret_key": "test-secret-key-do-not-use-in-production",
+        "algorithm": "HS256",
+        "access_token_expire_minutes": 5,
+        "refresh_token_expire_minutes": 10,
+    }
+    defaults.update(overrides)
+    return AuthConfig(**defaults)
+```
+
+#### [NEW] src/fauth/testing/fakes.py
+
+| Class | Implements | Behavior |
+|---|---|---|
+| `FakeUserLoader` | `UserLoader[T]` | In-memory `dict[str, T]` of users. Returns user matching `payload.sub`, or `None`. Pre-populate via `add_user()`. |
+| `FakeTokenBlacklist` | `TokenBlacklist` | In-memory `set[str]` of revoked JTIs. `is_revoked()` checks the set; `revoke()` adds to it. |
+
+```python
+class FakeUserLoader(Generic[T]):
+    """In-memory UserLoader for tests. Pre-populate with add_user()."""
+
+    def __init__(self) -> None:
+        self._users: dict[str, T] = {}
+
+    def add_user(self, user_id: str, user: T) -> None:
+        self._users[user_id] = user
+
+    async def __call__(self, token_payload: TokenPayload) -> T | None:
+        return self._users.get(token_payload.sub)
+
+
+class FakeTokenBlacklist:
+    """In-memory token blacklist for tests."""
+
+    def __init__(self) -> None:
+        self._revoked: set[str] = set()
+
+    async def is_revoked(self, jti: str) -> bool:
+        return jti in self._revoked
+
+    async def revoke(self, jti: str, expires_in: int) -> None:
+        self._revoked.add(jti)
+```
+
+#### [NEW] src/fauth/testing/provider.py
+
+Convenience factory that wires fakes into a ready-to-use `AuthProvider`:
+
+```python
+def fake_auth_provider(
+    users: dict[str, T] | None = None,
+    with_blacklist: bool = False,
+    config_overrides: dict | None = None,
+) -> AuthProvider[T]:
+    """Returns a fully-wired AuthProvider backed by in-memory fakes."""
+    config = fake_auth_config(**(config_overrides or {}))
+    loader = FakeUserLoader()
+    if users:
+        for uid, user in users.items():
+            loader.add_user(uid, user)
+    blacklist = FakeTokenBlacklist() if with_blacklist else None
+    return AuthProvider(config=config, user_loader=loader, token_blacklist=blacklist)
+```
+
+**Consumer usage example:**
+
+```python
+# tests/conftest.py (in the consumer's project)
+import pytest
+from fauth.testing import fake_auth_provider
+from myapp.models import User
+
+@pytest.fixture
+def auth():
+    user = User(id="user-1", name="Alice", roles=["admin"], is_active=True)
+    return fake_auth_provider(users={"user-1": user}, with_blacklist=True)
+```
+
+---
+
 ## Final Project Structure
 
 ```
@@ -261,6 +354,11 @@ fauth/
 │       ├── types.py             # Type aliases
 │       ├── provider.py          # AuthProvider (main API surface)
 │       ├── router.py            # Optional pre-built routes
+│       ├── testing/
+│       │   ├── __init__.py      # Re-exports for test helpers
+│       │   ├── config.py        # fake_auth_config() factory
+│       │   ├── fakes.py         # FakeUserLoader, FakeTokenBlacklist
+│       │   └── provider.py      # fake_auth_provider() factory
 │       └── transports/
 │           ├── __init__.py
 │           ├── base.py          # Abstract transport
@@ -310,6 +408,7 @@ mypy src/fauth/
 | `test_provider.py` | `get_current_user`, `get_current_active_user`, login flow |
 | `test_rbac.py` | `require_roles`, `require_permissions`, insufficient perms raises 403 |
 | `test_transports.py` | Bearer extraction, cookie set/read/delete |
+| `test_testing.py` | `FakeUserLoader` add/lookup, `FakeTokenBlacklist` revoke/check, `fake_auth_config` defaults & overrides, `fake_auth_provider` wiring |
 | `test_integration.py` | Full FastAPI `TestClient` end-to-end: register → login → access protected route → refresh → logout |
 
 ### Manual Verification
