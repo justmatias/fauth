@@ -12,5 +12,5 @@ An ergonomic, plug-and-play authentication library for FastAPI.
 - **Built-in Password Hashing**: Uses modern Argon2 via `pwdlib`.
 - **RBAC**: Flexible `require_roles` and `require_permissions` dependencies for endpoint authorization.
 - **Pre-built Routes**: Optional pre-configured routers for login, refresh, and logout endpoints.
-- **Type Safety**: fully annotated for MyPy and IDE integration.
-- **Testing Helpers**: Utilities to make it easy for consumers to write unit tests for endpoints protected by `fauth`.
+- **Testing Utilities**: Ships fake implementations (`FakeUserLoader`, `FakeTokenBlacklist`) and a `fake_auth_provider()` factory so consumers can write unit tests with zero boilerplate.
+- **Type Safety**: Fully annotated for MyPy and IDE integration.
