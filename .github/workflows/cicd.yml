@@ -1,0 +1,144 @@
+name: CI
+
+on:
+  push:
+    branches: ['main']
+  pull_request:
+    branches: ['main']
+
+permissions:
+  id-token: write
+  contents: write
+  actions: write
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+          token: ${{ env.GH_TOKEN }}
+          fetch-depth: 0
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: '0.9.11'
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          uv sync --all-groups --frozen
+
+      - name: Run lint and format checks
+        id: format
+        run: |
+          uv run poe format
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          fetch-depth: 0
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: '0.9.11'
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          uv sync --all-groups --frozen
+
+      - name: Run unit tests
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        run: |
+          uv run poe test
+
+  requirements:
+    name: Requirements
+    if: github.ref != 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          fetch-depth: 0
+          ref: ${{ github.head_ref }}
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: '0.9.11'
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          uv sync --all-groups --frozen
+
+      - name: Generate requirements.txt
+        run: |
+          uv pip compile pyproject.toml -o requirements.txt
+
+      - name: Commit and push requirements.txt
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add requirements.txt
+          git diff --staged --quiet || git commit -m "chore(config): update requirements.txt"
+          git push origin HEAD:${{ github.head_ref }}
+
+  versioning:
+    name: Versioning
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v6
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+          token: ${{ env.GH_TOKEN }}
+          fetch-depth: 0
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: '0.9.11'
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          uv sync --all-groups --frozen
+
+      - name: Bump version and update changelog
+        uses: python-semantic-release/python-semantic-release@v9.21.1
+        with:
+          github_token: ${{ secrets.GH_TOKEN }}

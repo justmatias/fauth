@@ -1,0 +1,67 @@
+repos:
+  - repo: https://github.com/abravalheri/validate-pyproject
+    rev: v0.25
+    hooks:
+      - id: validate-pyproject
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: detect-private-key
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.0
+    hooks:
+      - id: gitleaks
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: 'v0.15.5'
+    hooks:
+      - id: ruff-check
+        name: ruff
+        args: ['--fix']
+
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.9.4
+    hooks:
+      - id: bandit
+        args: ['-r', '-lll']
+
+  - repo: https://github.com/pylint-dev/pylint
+    rev: v4.0.5
+    hooks:
+      - id: pylint
+        types: [python]
+        additional_dependencies:
+          - loguru==0.7.3
+          - pydantic==2.12.4
+          - pydantic-settings==2.12
+          - uvicorn==0.38.0
+          - python-dotenv==1.2.1
+          - streamlit==1.52.2
+          - pytest==9.0.2
+          - polyfactory==3.2.0
+          - dependency-injector==4.48.3
+          - sqlmodel==0.0.37
+          - fastapi==0.134.0
+          - inject==5.3.0
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.19.1
+    hooks:
+      - id: mypy
+        additional_dependencies:
+          - loguru==0.7.3
+          - pydantic==2.12.4
+          - pydantic-settings==2.12
+          - python-dotenv==1.2.1
+          - streamlit==1.52.2
+          - pytest==9.0.2
+          - polyfactory==3.2.0
+          - sqlmodel==0.0.37
+          - fastapi==0.134.0
+          - inject==5.3.0
+          - pyjwt==2.11.0
+          - pwdlib==0.3.0
