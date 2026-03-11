@@ -1,6 +1,6 @@
 from typing import Any
 
-from fauth.config import AuthConfig
+from fauth.core import AuthConfig
 
 
 def fake_auth_config(**overrides: Any) -> AuthConfig:

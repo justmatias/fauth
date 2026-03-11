@@ -1,8 +1,8 @@
 from typing import Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 
-from fauth.provider import AuthProvider
+from fauth.providers import AuthProvider
 
 
 class SecureAPIRouter(APIRouter):
@@ -18,7 +18,7 @@ class SecureAPIRouter(APIRouter):
         **kwargs: Any,
     ) -> None:
         dependencies: list[Any] = list(kwargs.pop("dependencies", []))
-        dependencies.append(Depends(auth_provider.require_active_user))
+        dependencies.append(auth_provider.require_active_user())
         kwargs["dependencies"] = dependencies
 
         super().__init__(*args, **kwargs)

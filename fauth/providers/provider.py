@@ -3,13 +3,17 @@ from typing import Any, Generic, TypeVar
 
 from fastapi import Depends, HTTPException, Request, status
 
-from fauth.config import AuthConfig
-from fauth.exceptions import InvalidTokenError, TokenExpiredError
-from fauth.jwt import create_access_token, create_refresh_token, decode_token
-from fauth.protocols import UserLoader
-from fauth.schemas import TokenPayload, TokenResponse
-from fauth.transports.base import Transport
-from fauth.transports.bearer import BearerTransport
+from fauth.core import (
+    AuthConfig,
+    InvalidTokenError,
+    TokenExpiredError,
+    TokenPayload,
+    TokenResponse,
+)
+from fauth.crypto import create_access_token, create_refresh_token, decode_token
+from fauth.transports import BearerTransport, Transport
+
+from .protocols import UserLoader
 
 T = TypeVar("T")
 

@@ -1,18 +1,44 @@
+# pylint: disable=duplicate-code
 from importlib.metadata import version
 
-from .config import AuthConfig
-from .protocols import UserLoader
-from .provider import AuthProvider
-from .router import SecureAPIRouter
-from .schemas import TokenPayload, TokenResponse
+from .api import SecureAPIRouter
+from .core import (
+    AuthConfig,
+    FAuthError,
+    InvalidTokenError,
+    TokenExpiredError,
+    TokenPayload,
+    TokenResponse,
+)
+from .crypto import (
+    create_access_token,
+    create_refresh_token,
+    create_token,
+    decode_token,
+    hash_password,
+    verify_password,
+)
+from .providers import AuthProvider, UserLoader
+from .transports import BearerTransport, Transport
 
 __version__ = version("fauth")
 
 __all__ = [
     "AuthConfig",
     "AuthProvider",
+    "BearerTransport",
+    "FAuthError",
+    "InvalidTokenError",
     "SecureAPIRouter",
+    "TokenExpiredError",
     "TokenPayload",
     "TokenResponse",
+    "Transport",
     "UserLoader",
+    "create_access_token",
+    "create_refresh_token",
+    "create_token",
+    "decode_token",
+    "hash_password",
+    "verify_password",
 ]

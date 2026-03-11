@@ -1,6 +1,6 @@
 from typing import Protocol, TypeVar
 
-from fauth.schemas import TokenPayload
+from fauth.core import TokenPayload
 
 T = TypeVar("T", covariant=True)
 

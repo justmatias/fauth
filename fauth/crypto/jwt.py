@@ -2,11 +2,9 @@ import datetime
 import uuid
 from typing import Any
 
-import jwt
+import jwt as pyjwt
 
-from fauth.config import AuthConfig
-from fauth.exceptions import InvalidTokenError, TokenExpiredError
-from fauth.schemas import TokenPayload
+from fauth.core import AuthConfig, InvalidTokenError, TokenExpiredError, TokenPayload
 
 
 def create_token(  # pylint: disable=too-many-arguments, too-many-positional-arguments
@@ -30,7 +28,7 @@ def create_token(  # pylint: disable=too-many-arguments, too-many-positional-arg
         **(extra or {}),
     }
 
-    return jwt.encode(payload, config.secret_key, algorithm=config.algorithm)
+    return pyjwt.encode(payload, config.secret_key, algorithm=config.algorithm)
 
 
 def create_access_token(
@@ -71,13 +69,13 @@ def decode_token(
     token_payload_schema: type[TokenPayload] = TokenPayload,
 ) -> TokenPayload:
     try:
-        decoded = jwt.decode(
+        decoded = pyjwt.decode(
             token,
             config.secret_key,
             algorithms=[config.algorithm],
         )
         return token_payload_schema(**decoded)
-    except jwt.ExpiredSignatureError as e:
+    except pyjwt.ExpiredSignatureError as e:
         raise TokenExpiredError("Token has expired") from e
-    except jwt.InvalidTokenError as e:
+    except pyjwt.InvalidTokenError as e:
         raise InvalidTokenError("Invalid token") from e

@@ -1,8 +1,9 @@
 from typing import Any, TypeVar
 
-from fauth.provider import AuthProvider
-from fauth.testing.config import fake_auth_config
-from fauth.testing.fakes import FakeUserLoader
+from fauth.providers import AuthProvider
+
+from .config import fake_auth_config
+from .fakes import FakeUserLoader
 
 T = TypeVar("T")
 
