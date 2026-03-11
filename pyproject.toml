@@ -5,7 +5,7 @@ description = "Ergonomic, lightweight JWT authentication for FastAPI. Secure you
 readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT"
-authors = [{ name = "Matias" }]
+authors = [{ name = "Matias Gimenez", email = "matiasgimenez.dev@gmail.com" }]
 keywords = ["fastapi", "authentication", "jwt", "rbac", "security"]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -36,6 +36,7 @@ dev = [
     "pytest-sugar>=1.1.1",
     "poethepoet>=0.37",
     "pre-commit>=4.4",
+    "httpx>=0.28.1",
 ]
 
 [project.urls]
