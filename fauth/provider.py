@@ -45,7 +45,7 @@ class AuthProvider(Generic[T]):
         self._require_user = self._build_require_user_dependency()
         self._require_active_user = self._build_require_active_user_dependency()
 
-    def _build_require_user_dependency(self) -> Callable:
+    def _build_require_user_dependency(self) -> Callable[..., Any]:
         async def dependency(request: Request) -> T:
             token = await self.transport(request)
             if not token:
@@ -78,13 +78,13 @@ class AuthProvider(Generic[T]):
 
         return dependency
 
-    def require_user(self) -> Callable[..., Any]:
+    def require_user(self) -> Callable:
         """Dependency to get the currently authenticated user."""
-        return Depends(self._require_user)
+        return Depends(self._require_user)  # type: ignore[no-any-return]
 
     def _build_require_active_user_dependency(self) -> Callable:
         async def dependency(user: T = Depends(self._require_user)) -> T:
-            if hasattr(user, "is_active") and not getattr(user, "is_active"):
+            if hasattr(user, "is_active") and not user.is_active:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Inactive user",
@@ -93,11 +93,11 @@ class AuthProvider(Generic[T]):
 
         return dependency
 
-    def require_active_user(self) -> Callable[..., Any]:
+    def require_active_user(self) -> Callable:
         """Dependency to get the current user, demanding they be active."""
-        return Depends(self._require_active_user)
+        return Depends(self._require_active_user)  # type: ignore[no-any-return]
 
-    def require_roles(self, *roles: str) -> Callable[..., Any]:
+    def require_roles(self, *roles: str) -> Callable:
         """Dependency demanding the user has all specified roles."""
 
         async def dependency(
@@ -112,9 +112,9 @@ class AuthProvider(Generic[T]):
                     )
             return user
 
-        return Depends(dependency)
+        return Depends(dependency)  # type: ignore[no-any-return]
 
-    def require_permissions(self, *permissions: str) -> Callable[..., Any]:
+    def require_permissions(self, *permissions: str) -> Callable:
         """Dependency demanding the user has all specified permissions."""
 
         async def dependency(
@@ -129,7 +129,7 @@ class AuthProvider(Generic[T]):
                     )
             return user
 
-        return Depends(dependency)
+        return Depends(dependency)  # type: ignore[no-any-return]
 
     async def login(
         self,

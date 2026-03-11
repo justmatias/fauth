@@ -7,7 +7,7 @@ from fauth.testing.fakes import FakeUserLoader
 T = TypeVar("T")
 
 
-def build_fake_auth_provider(
+def build_fake_auth_provider(  # noqa: UP047
     users: dict[str, T] | None = None,
     config_overrides: dict[str, Any] | None = None,
 ) -> AuthProvider[T]:

@@ -15,9 +15,9 @@ class SecureAPIRouter(APIRouter):
         self,
         auth_provider: AuthProvider[Any],
         *args: Any,
-        **kwargs: dict[str, Any],
-    ):
-        dependencies = kwargs.pop("dependencies", [])
+        **kwargs: Any,
+    ) -> None:
+        dependencies: list[Any] = list(kwargs.pop("dependencies", []))
         dependencies.append(Depends(auth_provider.require_active_user))
         kwargs["dependencies"] = dependencies
 

@@ -80,9 +80,7 @@ format.indent-style = "space"
 format.quote-style = "double"
 format.line-ending = "auto"
 format.skip-magic-trailing-comma = false
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-asyncio_mode = "auto"
+ignore=["UP046", "PLC0105", "B008"]
 
 ##################################
 # mypy configuration             #
@@ -116,6 +114,8 @@ disable = [
   "import-error",
   "invalid-name",
   "no-value-for-parameter",
+  "unnecessary-ellipsis",
+  "typevar-name-incorrect-variance",
 ]
 extension-pkg-allow-list = ["dependency_injector"]
 generated-members = ["dependency_injector.*"]

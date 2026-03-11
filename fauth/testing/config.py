@@ -13,4 +13,4 @@ def fake_auth_config(**overrides: Any) -> AuthConfig:
         "token_type": "bearer",
     }
     defaults.update(overrides)
-    return AuthConfig(**defaults)
+    return AuthConfig(**defaults)  # type: ignore[arg-type]

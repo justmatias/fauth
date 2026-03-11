@@ -9,7 +9,7 @@ from fauth.exceptions import InvalidTokenError, TokenExpiredError
 from fauth.schemas import TokenPayload
 
 
-def create_token(
+def create_token(  # pylint: disable=too-many-arguments, too-many-positional-arguments
     sub: str,
     token_type: str,
     expire_minutes: int,
@@ -17,7 +17,7 @@ def create_token(
     scopes: list[str] | None = None,
     extra: dict[str, Any] | None = None,
 ) -> str:
-    now = datetime.datetime.now(datetime.timezone.utc)
+    now = datetime.datetime.now(datetime.UTC)
     exp = now + datetime.timedelta(minutes=expire_minutes)
 
     payload = {

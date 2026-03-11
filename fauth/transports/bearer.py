@@ -15,8 +15,6 @@ class BearerTransport(Transport):
 
     def set_token_response(self, response: Response, token: str) -> None:
         """For Bearer token, we don't set it in a header/cookie here."""
-        pass
 
     def clear_token_response(self, response: Response) -> None:
         """For Bearer token, client typically handles removal on their end."""
-        pass

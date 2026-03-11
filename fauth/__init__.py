@@ -11,8 +11,8 @@ __version__ = version("fauth")
 __all__ = [
     "AuthConfig",
     "AuthProvider",
+    "SecureAPIRouter",
     "TokenPayload",
     "TokenResponse",
     "UserLoader",
-    "SecureAPIRouter",
 ]
