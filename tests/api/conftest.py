@@ -1,3 +1,4 @@
+from typing import Any
 from uuid import UUID, uuid4
 
 import pytest
@@ -28,16 +29,6 @@ def inactive_user() -> DummyUser:
 
 
 @pytest.fixture
-def auth_config() -> AuthConfig:
-    return AuthConfig(  # type: ignore[call-arg]
-        secret_key="test-secret",
-        algorithm="HS256",
-        access_token_expire_minutes=5,
-        refresh_token_expire_minutes=10,
-    )
-
-
-@pytest.fixture
 def user_loader() -> FakeUserLoader[DummyUser]:
     return FakeUserLoader()
 
@@ -56,7 +47,7 @@ def app(provider: AuthProvider[DummyUser]) -> FastAPI:
     secured = SecureAPIRouter(auth_provider=provider)
 
     @secured.get("/secure")
-    def secure_route():
+    def secure_route() -> dict[str, Any]:
         return {"msg": "secret"}
 
     _app.include_router(secured)

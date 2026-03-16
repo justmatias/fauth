@@ -1,4 +1,5 @@
 import time
+from typing import Any
 from uuid import UUID, uuid4
 
 import pytest
@@ -30,16 +31,6 @@ def inactive_user() -> DummyUser:
 
 
 @pytest.fixture
-def auth_config() -> AuthConfig:
-    return AuthConfig(  # type: ignore[call-arg]
-        secret_key="test-secret",
-        algorithm="HS256",
-        access_token_expire_minutes=5,
-        refresh_token_expire_minutes=10,
-    )
-
-
-@pytest.fixture
 def user_loader() -> FakeUserLoader[DummyUser]:
     return FakeUserLoader()
 
@@ -56,19 +47,27 @@ def fastapi_app(provider: AuthProvider[DummyUser]) -> FastAPI:
     app = FastAPI()
 
     @app.get("/user")
-    def get_user(user: DummyUser = provider.require_user()):
+    def get_user(
+        user: DummyUser = provider.require_user(),  # type: ignore[assignment]
+    ) -> dict[str, Any]:
         return {"id": str(user.id_)}
 
     @app.get("/active-user")
-    def get_active_user(user: DummyUser = provider.require_active_user()):
+    def get_active_user(
+        user: DummyUser = provider.require_active_user(),  # type: ignore[assignment]
+    ) -> dict[str, Any]:
         return {"id": str(user.id_)}
 
     @app.get("/admin")
-    def get_admin(user: DummyUser = provider.require_roles("admin")):
+    def get_admin(
+        user: DummyUser = provider.require_roles("admin"),  # type: ignore[assignment]
+    ) -> dict[str, Any]:
         return {"id": str(user.id_)}
 
     @app.get("/writer")
-    def get_writer(user: DummyUser = provider.require_permissions("write")):
+    def get_writer(
+        user: DummyUser = provider.require_permissions("write"),  # type: ignore[assignment]
+    ) -> dict[str, Any]:
         return {"id": str(user.id_)}
 
     return app
@@ -86,7 +85,7 @@ def user_token(auth_config: AuthConfig, user: DummyUser) -> str:
 
 @pytest.fixture
 def expired_token(auth_config: AuthConfig) -> str:
-    expired_config = AuthConfig(  # type: ignore[call-arg]
+    expired_config = AuthConfig(
         secret_key=auth_config.secret_key,
         algorithm=auth_config.algorithm,
         access_token_expire_minutes=0,

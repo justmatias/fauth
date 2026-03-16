@@ -1,7 +1,6 @@
 import pytest
-from polyfactory.factories.pydantic_factory import ModelFactory
 
-from fauth.core import AuthConfig, TokenPayload, TokenResponse
+from fauth.core import AuthConfig
 
 
 @pytest.fixture

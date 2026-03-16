@@ -30,6 +30,8 @@ def test_create_access_token_includes_extra_claims(config: AuthConfig) -> None:
 
     assert payload.tenant_id == "acme"  # type: ignore[attr-defined]
 
+
+def test_create_refresh_token_returns_valid_jwt(config: AuthConfig) -> None:
     token = create_refresh_token(sub="user-1", config=config)
     payload = decode_token(token, config)
 
@@ -49,7 +51,7 @@ def test_create_refresh_token_includes_extra_claims(config: AuthConfig) -> None:
         sub="user-1", config=config, extra={"tenant_id": "acme"}
     )
     payload = decode_token(token, config)
-    assert payload.tenant_id == "acme"
+    assert payload.tenant_id == "acme"  # type: ignore[attr-defined]
 
 
 def test_decode_token_raises_on_expired(expired_config: AuthConfig) -> None:

@@ -1,8 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from fauth.core import AuthConfig
-
 
 def test_secure_router_denies_unauthenticated(client: TestClient) -> None:
     response = client.get("/secure")
@@ -13,7 +11,6 @@ def test_secure_router_denies_unauthenticated(client: TestClient) -> None:
 @pytest.mark.usefixtures("_populate_dummy_user")
 def test_secure_router_allows_authenticated(
     client: TestClient,
-    auth_config: AuthConfig,
     user_access_token: str,
 ) -> None:
     response = client.get(
