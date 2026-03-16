@@ -37,6 +37,7 @@ dev = [
     "poethepoet>=0.37",
     "pre-commit>=4.4",
     "httpx>=0.28.1",
+    "polyfactory>=3.3.0",
 ]
 
 [project.urls]
