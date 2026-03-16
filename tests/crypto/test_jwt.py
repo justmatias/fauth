@@ -6,7 +6,30 @@ from fauth.core import AuthConfig, InvalidTokenError, TokenExpiredError
 from fauth.crypto import create_access_token, create_refresh_token, decode_token
 
 
-def test_create_refresh_token_returns_valid_jwt(config: AuthConfig) -> None:
+def test_create_access_token_returns_valid_jwt(config: AuthConfig) -> None:
+    token = create_access_token(sub="user-1", config=config)
+    payload = decode_token(token, config)
+
+    assert payload.sub == "user-1"
+    assert payload.token_type == "access"
+    assert isinstance(payload.scopes, list)
+
+
+def test_create_access_token_includes_scopes(config: AuthConfig) -> None:
+    token = create_access_token(sub="user-1", config=config, scopes=["read", "write"])
+    payload = decode_token(token, config)
+
+    assert payload.scopes == ["read", "write"]
+
+
+def test_create_access_token_includes_extra_claims(config: AuthConfig) -> None:
+    token = create_access_token(
+        sub="user-1", config=config, extra={"tenant_id": "acme"}
+    )
+    payload = decode_token(token, config)
+
+    assert payload.tenant_id == "acme"  # type: ignore[attr-defined]
+
     token = create_refresh_token(sub="user-1", config=config)
     payload = decode_token(token, config)
 
