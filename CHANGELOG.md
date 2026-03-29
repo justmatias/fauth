@@ -1,6 +1,61 @@
 # CHANGELOG
 
 
+## v0.1.0 (2026-03-29)
+
+### Bug Fixes
+
+- Add tests for core and api modules
+  ([`cb6ed8a`](https://github.com/justmatias/fauth/commit/cb6ed8aabca0e4de41054cfd1857e1f41973d55c))
+
+- Add tests for create_access_token
+  ([`eae2201`](https://github.com/justmatias/fauth/commit/eae22013a94a56e931fbd2ba21f1800b90a4fd29))
+
+- Add tests for jwt utilities and password utilities.
+  ([`23f6345`](https://github.com/justmatias/fauth/commit/23f6345412be42eb6377f3bd008e4c0700b29ccb))
+
+- Add unit tests and fixtures for the authentication provider.
+  ([`e81e447`](https://github.com/justmatias/fauth/commit/e81e447391307df431a419439b30c46ab6f3f0cd))
+
+### Chores
+
+- Add polyfactory as new development dependencies.
+  ([`e36e895`](https://github.com/justmatias/fauth/commit/e36e895fff0843218efcf425c75bb6ed66e29ad6))
+
+- Add pypi publishing job
+  ([`e8f5ba0`](https://github.com/justmatias/fauth/commit/e8f5ba07326dd058ed7df1f3881a7831ba563392))
+
+- Fix lint issues
+  ([`8e18b2f`](https://github.com/justmatias/fauth/commit/8e18b2f4d093a05f897033c97241158dab727100))
+
+- Improve type hints, update dependencies, and apply minor stylistic adjustments across several
+  modules
+  ([`1d55d31`](https://github.com/justmatias/fauth/commit/1d55d31cb7bd143dc353a44628c6f3575e571420))
+
+- Restructure main package
+  ([`f0d7236`](https://github.com/justmatias/fauth/commit/f0d723698da27d74cb7db9c7ca3a0ef2b1e129a2))
+
+- **config**: Merge with main
+  ([`c66d1eb`](https://github.com/justmatias/fauth/commit/c66d1eb612a2caebe790d20ce4a7f162ee49b6a4))
+
+- **config**: Update pre-commit hooks
+  ([`77a8f95`](https://github.com/justmatias/fauth/commit/77a8f95d330ea0570a04ca8bd5bbccc72554e5e4))
+
+- **config**: Update requirements.txt
+  ([`13b718a`](https://github.com/justmatias/fauth/commit/13b718aae048d817191fe26a96b6fd964f59e82a))
+
+- **config**: Update requirements.txt
+  ([`ec11b90`](https://github.com/justmatias/fauth/commit/ec11b90eb30ab24a5b384c5b9662077fea46d903))
+
+- **config**: Update requirements.txt
+  ([`08fed86`](https://github.com/justmatias/fauth/commit/08fed86e03f8bd6e3ec902dfc1d13225406be4a6))
+
+### Features
+
+- Implement core authentication logic, transports, and testing utilities
+  ([`7abbd34`](https://github.com/justmatias/fauth/commit/7abbd343405c93fc86de1c454b51c94a25b04774))
+
+
 ## v0.0.0 (2026-03-10)
 
 ### Chores

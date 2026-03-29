@@ -115,6 +115,7 @@ jobs:
     name: Versioning
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
+    needs: [lint, test]
     steps:
       - uses: actions/checkout@v6
         env:
@@ -139,6 +140,42 @@ jobs:
           uv sync --all-groups --frozen
 
       - name: Bump version and update changelog
+        id: release
         uses: python-semantic-release/python-semantic-release@v9.21.1
         with:
           github_token: ${{ secrets.GH_TOKEN }}
+
+    outputs:
+      released: ${{ steps.release.outputs.released }}
+
+  publish:
+    name: Publish to PyPI
+    runs-on: ubuntu-latest
+    if: needs.versioning.outputs.released == 'true'
+    needs: [versioning]
+    environment:
+      name: pypi
+      url: https://pypi.org/p/fauth
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          ref: main
+          fetch-depth: 0
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: '0.9.11'
+          python-version: '3.13'
+
+      - name: Build package
+        run: uv build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
