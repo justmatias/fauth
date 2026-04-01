@@ -3,7 +3,7 @@ from typing import Any
 from uuid import UUID, uuid4
 
 import pytest
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.testclient import TestClient
 from pydantic import BaseModel, Field
 
@@ -48,25 +48,25 @@ def fastapi_app(provider: AuthProvider[DummyUser]) -> FastAPI:
 
     @app.get("/user")
     def get_user(
-        user: DummyUser = provider.require_user(),  # type: ignore[assignment]
+        user: DummyUser = Depends(provider.require_user),
     ) -> dict[str, Any]:
         return {"id": str(user.id_)}
 
     @app.get("/active-user")
     def get_active_user(
-        user: DummyUser = provider.require_active_user(),  # type: ignore[assignment]
+        user: DummyUser = Depends(provider.require_active_user),
     ) -> dict[str, Any]:
         return {"id": str(user.id_)}
 
     @app.get("/admin")
     def get_admin(
-        user: DummyUser = provider.require_roles("admin"),  # type: ignore[assignment]
+        user: DummyUser = Depends(provider.require_roles(["admin"])),
     ) -> dict[str, Any]:
         return {"id": str(user.id_)}
 
     @app.get("/writer")
     def get_writer(
-        user: DummyUser = provider.require_permissions("write"),  # type: ignore[assignment]
+        user: DummyUser = Depends(provider.require_permissions(["write"])),
     ) -> dict[str, Any]:
         return {"id": str(user.id_)}
 

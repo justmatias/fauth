@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from typing import Any, Generic, TypeVar
+from typing import Annotated, Any, Generic, TypeVar
 
 from fastapi import Depends, HTTPException, Request, status
 
@@ -39,101 +39,79 @@ class AuthProvider(Generic[T]):
             transport = BearerTransport()
         self.transport = transport
 
-        # Cache the dependency functions to optimize performance per-request.
-        # FastAPI's dependency injection system uses function identity to determine
-        # if a dependency has already been executed for a given request.
-        # By calling the factory methods once and storing the resulting function objects,
-        # FastAPI recognizes them as exactly the same dependency whenever `Depends()` is used.
-        # This ensures token decoding and database lookups (user_loader) only happen
-        # once per request, even if required by multiple routes or sub-dependencies.
-        self._require_user = self._build_require_user_dependency()
-        self._require_active_user = self._build_require_active_user_dependency()
+    async def require_user(self, request: Request) -> T:
+        """Utility to get the currently authenticated user."""
+        token = await self.transport(request)
+        if not token:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Not authenticated",
+            )
 
-    def _build_require_user_dependency(self) -> Callable[..., Any]:
-        async def dependency(request: Request) -> T:
-            token = await self.transport(request)
-            if not token:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Not authenticated",
-                )
+        try:
+            payload = decode_token(token, self.config, self.token_payload_schema)
+        except TokenExpiredError as e:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token expired",
+            ) from e
+        except InvalidTokenError as e:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token",
+            ) from e
 
-            try:
-                payload = decode_token(token, self.config, self.token_payload_schema)
-            except TokenExpiredError as e:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Token expired",
-                ) from e
-            except InvalidTokenError as e:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Invalid token",
-                ) from e
+        user = await self.user_loader(payload)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User does not exist",
+            )
 
-            user = await self.user_loader(payload)
-            if not user:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="User does not exist",
-                )
+        return user
 
-            return user
+    async def require_active_user(self, request: Request) -> T:
+        """Utility to get the currently authenticated active user."""
+        user = await self.require_user(request)
+        if hasattr(user, "is_active") and not user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Inactive user",
+            )
+        return user
 
-        return dependency
+    def require_roles(self, roles: list[str]) -> Callable:
+        """Dependency demanding the current user has all specified roles."""
 
-    def require_user(self) -> Callable:
-        """Dependency to get the currently authenticated user."""
-        return Depends(self._require_user)  # type: ignore[no-any-return]
-
-    def _build_require_active_user_dependency(self) -> Callable:
-        async def dependency(user: T = Depends(self._require_user)) -> T:
-            if hasattr(user, "is_active") and not user.is_active:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Inactive user",
-                )
-            return user
-
-        return dependency
-
-    def require_active_user(self) -> Callable:
-        """Dependency to get the current user, demanding they be active."""
-        return Depends(self._require_active_user)  # type: ignore[no-any-return]
-
-    def require_roles(self, *roles: str) -> Callable:
-        """Dependency demanding the user has all specified roles."""
-
-        async def dependency(
-            user: T = Depends(self._require_active_user),
+        async def role_checker(
+            user: Annotated[T, Depends(self.require_active_user)],
         ) -> T:
             user_roles = getattr(user, "roles", [])
-            for role in roles:
+            required_roles = set(roles)
+            for role in required_roles:
                 if role not in user_roles:
-                    raise HTTPException(
-                        status_code=status.HTTP_403_FORBIDDEN,
-                        detail=f"Insufficient permissions: requires {role} role",
-                    )
+                    raise HTTPException(status_code=403, detail=f"Missing role: {role}")
             return user
 
-        return Depends(dependency)  # type: ignore[no-any-return]
+        return role_checker
 
-    def require_permissions(self, *permissions: str) -> Callable:
-        """Dependency demanding the user has all specified permissions."""
+    def require_permissions(self, permissions: list[str]) -> Callable:
+        """Dependency demanding the current user has all specified permissions."""
 
-        async def dependency(
-            user: T = Depends(self._require_active_user),
+        async def permission_checker(
+            user: Annotated[T, Depends(self.require_active_user)],
         ) -> T:
             user_permissions = getattr(user, "permissions", [])
-            for perm in permissions:
-                if perm not in user_permissions:
+            required_permissions = set(permissions)
+            for permission in required_permissions:
+                if permission not in user_permissions:
                     raise HTTPException(
                         status_code=status.HTTP_403_FORBIDDEN,
-                        detail=f"Insufficient permissions: requires {perm} permission",
+                        detail=f"Insufficient permissions: requires {permission} permission",
                     )
             return user
 
-        return Depends(dependency)  # type: ignore[no-any-return]
+        return permission_checker
 
     async def login(
         self,

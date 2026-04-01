@@ -58,7 +58,7 @@ def test_require_roles_denied(client: TestClient, no_roles_user_token: str) -> N
         "/admin", headers={"Authorization": f"Bearer {no_roles_user_token}"}
     )
     assert response.status_code == 403
-    assert "requires admin role" in response.json()["detail"]
+    assert "Missing role: admin" in response.json()["detail"]
 
 
 @pytest.mark.usefixtures("_populate_user")
