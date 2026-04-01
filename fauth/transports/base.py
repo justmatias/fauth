@@ -1,6 +1,7 @@
 from typing import Protocol
 
 from fastapi import Request, Response
+from fastapi.security.base import SecurityBase
 
 
 class Transport(Protocol):
@@ -16,4 +17,8 @@ class Transport(Protocol):
 
     def clear_token_response(self, response: Response) -> None:
         """Clears the token from the response."""
+        ...
+
+    def get_security_scheme(self) -> SecurityBase:
+        """Returns the security scheme for FastAPI OpenAPI documentation."""
         ...

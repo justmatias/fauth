@@ -9,7 +9,8 @@ An ergonomic, plug-and-play authentication library for FastAPI.
 - **Protocol-Based User Fetching**: Complete inversion of control. You implement a simple `UserLoader` protocol to define how to fetch a user from a token payload.
 - **Plug-and-Play Configuration**: Centralized settings via Pydantic (`AuthConfig`). Configure once, inject everywhere.
 - **Pluggable Transports**: Extensible `Transport` protocol with a built-in `BearerTransport` for Authorization header tokens.
-- **Built-in Password Hashing**: Uses modern Argon2 via `pwdlib`.
+- **Automatic OpenAPI/Swagger UI Support**: Integrated security schemes that automatically show the "Authorize" button and security lock icons in Swagger UI.
+- **Built-in Password Hashing & Crypto**: Uses modern Argon2 via `pwdlib` and includes utilities for creating/decoding JWT access and refresh tokens.
 - **RBAC**: Flexible `require_roles` and `require_permissions` dependencies for endpoint authorization.
 - **Secure Router**: `SecureAPIRouter` applies authentication as a router-level dependency, securing all its routes automatically.
 - **Testing Utilities**: Ships fake implementations (`FakeUserLoader`) and a `build_fake_auth_provider()` factory so consumers can write unit tests with zero boilerplate.
@@ -52,7 +53,7 @@ DB: dict[str, User] = {
 async def load_user(payload: TokenPayload) -> User | None:
     return DB.get(payload.sub)
 
-# 3. Instantiate the auth component (ideally wired in DI or at module-level)
+# 3. Instantiate the auth component
 config = AuthConfig(secret_key="my-super-secret-key", algorithm="HS256")
 auth: AuthProvider[User] = AuthProvider(config=config, user_loader=load_user)
 
@@ -60,24 +61,24 @@ auth: AuthProvider[User] = AuthProvider(config=config, user_loader=load_user)
 
 @app.post("/login")
 async def login():
-    # Example logic: password hashing checks omitted for brevity
-    # 4. Use `auth.login` to issue tokens
+    # 4. Use `auth.login` to issue tokens (password verification omitted)
     return await auth.login(sub="user-123")
 
 @app.get("/me")
-async def get_me(user: User = Depends(auth.require_user())):
-    # 5. `auth.require_user()` secures the endpoint automatically
+async def get_me(user: User = Depends(auth.require_user)):
+    # 5. `auth.require_user` secures the endpoint automatically
     return {"message": f"Hello {user.username}"}
 
 @app.get("/admin")
-async def get_admin_data(user: User = Depends(auth.require_roles("admin"))):
-    # 6. `auth.require_roles()` enforces RBAC implicitly
+async def get_admin_data(user: User = Depends(auth.require_roles(["admin"]))):
+    # 6. `auth.require_roles` enforces RBAC with list of roles
     return {"secret_data": "Top secret admin info"}
 
 # --- Securing Multiple Routes ---
 
 # 7. Use `SecureAPIRouter` to protect an entire group of routes.
 # Any route added to this router will require an active user automatically.
+# This also enables the "Authorize" button in Swagger UI!
 secure_router = SecureAPIRouter(auth_provider=auth, prefix="/internal", tags=["Protected"])
 
 @secure_router.get("/dashboard")
@@ -119,7 +120,6 @@ On the decoding side, your `user_loader` will receive a `MyTokenPayload` instanc
 FAuth ships with a `fauth.testing` module specifically to simplify testing. No complex JWT mocks or real database dependencies needed — just use `build_fake_auth_provider` to wire up an in-memory auth provider.
 
 ```python
-import asyncio
 import pytest
 from fastapi.testclient import TestClient
 from pydantic import BaseModel
@@ -141,10 +141,9 @@ def test_client() -> TestClient:
     # 2. Wire the fake provider with an in-memory user store
     fake = build_fake_auth_provider(users={"user-123": mock_user})
 
-    # 3. Override the internal cached dependency functions.
-    # These are the actual callables that FastAPI resolves inside Depends().
-    app.dependency_overrides[auth._require_user] = fake._require_user
-    app.dependency_overrides[auth._require_active_user] = fake._require_active_user
+    # 3. Override the dependency functions.
+    app.dependency_overrides[auth.require_user] = fake.require_user
+    app.dependency_overrides[auth.require_active_user] = fake.require_active_user
 
     yield TestClient(app)
 
@@ -157,22 +156,23 @@ def test_secure_route(test_client):
     assert response.json() == {"message": "Hello test_user"}
 ```
 
-### Alternative: End-to-end testing with real JWT tokens
+### End-to-end testing with real JWT tokens
 
 If you prefer issuing real tokens in tests, `build_fake_auth_provider` uses safe test defaults (a fixed secret key, short expiry) so you can generate tokens without any extra setup.
 
 ```python
-def test_secure_me_endpoint():
+@pytest.mark.asyncio
+async def test_secure_me_endpoint():
     user = User(id="user-999", username="fake_alice", roles=[])
 
     # FAuth supplies a pre-made test provider with safe defaults
     test_auth = build_fake_auth_provider(users={"user-999": user})
 
     # Generate a real JWT token via the test provider
-    token_response = asyncio.run(test_auth.login(sub="user-999"))
+    token_response = await test_auth.login(sub="user-999")
 
     # Override the dependency so the app uses the test user store
-    app.dependency_overrides[auth._require_user] = test_auth._require_user
+    app.dependency_overrides[auth.require_user] = test_auth.require_user
 
     # Apply Bearer token
     client = TestClient(app)

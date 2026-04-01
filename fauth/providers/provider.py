@@ -2,6 +2,7 @@ from collections.abc import Callable
 from typing import Annotated, Any, Generic, TypeVar
 
 from fastapi import Depends, HTTPException, Request, status
+from fastapi.security.base import SecurityBase
 
 from fauth.core import (
     AuthConfig,
@@ -137,3 +138,7 @@ class AuthProvider(Generic[T]):
             refresh_token=refresh_token,
             token_type=self.config.token_type,
         )
+
+    def get_security_scheme(self) -> SecurityBase:
+        """Returns the security scheme for FastAPI OpenAPI documentation."""
+        return self.transport.get_security_scheme()

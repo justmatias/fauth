@@ -1,5 +1,6 @@
 from fastapi import Request, Response
 from fastapi.security import OAuth2PasswordBearer
+from fastapi.security.base import SecurityBase
 
 from fauth.transports.base import Transport
 
@@ -18,3 +19,6 @@ class BearerTransport(Transport):
 
     def clear_token_response(self, response: Response) -> None:
         """For Bearer token, client typically handles removal on their end."""
+
+    def get_security_scheme(self) -> SecurityBase:
+        return self.scheme
