@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v0.1.2 (2026-04-01)
+
+### Bug Fixes
+
+- **config**: Add openapi security scheme support to AuthProvider and router dependencies
+  ([`72d7754`](https://github.com/justmatias/fauth/commit/72d7754fb0519be979b6b00b5f253b245770698c))
+
+### Chores
+
+- **docs**: Update readme
+  ([`892ea31`](https://github.com/justmatias/fauth/commit/892ea31dcae32aabd7f3d935a2579a1809ed12e4))
+
+
 ## v0.1.1 (2026-04-01)
 
 ### Bug Fixes
