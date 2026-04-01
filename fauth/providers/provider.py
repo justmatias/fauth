@@ -11,10 +11,15 @@ from fauth.core import (
     TokenPayload,
     TokenResponse,
 )
-from fauth.crypto import create_access_token, create_refresh_token, decode_token
+from fauth.crypto import (
+    create_access_token,
+    create_refresh_token,
+    decode_token,
+    verify_password,
+)
 from fauth.transports import BearerTransport, Transport
 
-from .protocols import UserLoader
+from .protocols import IdentityLoader, UserLoader
 
 T = TypeVar("T")
 
@@ -29,12 +34,16 @@ class AuthProvider(Generic[T]):
         self,
         config: AuthConfig,
         user_loader: UserLoader[T],
+        identity_loader: IdentityLoader[T] | None = None,
         transport: Transport | None = None,
         token_payload_schema: type[TokenPayload] = TokenPayload,
+        password_field_name: str = "hashed_password",
     ):
         self.config = config
         self.user_loader = user_loader
+        self.identity_loader = identity_loader
         self.token_payload_schema = token_payload_schema
+        self.password_field_name = password_field_name
 
         if not transport:
             transport = BearerTransport()
@@ -113,6 +122,37 @@ class AuthProvider(Generic[T]):
             return user
 
         return permission_checker
+
+    async def authenticate(self, identifier: str, password: str) -> T:
+        """
+        Authenticates a user by their identifier and password.
+        Returns the user if valid and active, otherwise raises HTTPException.
+        """
+        if not self.identity_loader:
+            raise RuntimeError("IdentityLoader must be provided to use authenticate()")
+
+        user = await self.identity_loader(identifier)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid credentials",
+            )
+
+        hashed = getattr(user, self.password_field_name, None)
+        if not hashed or not verify_password(password, hashed):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid credentials",
+            )
+
+        # Ensure user is active if it has is_active attribute
+        if hasattr(user, "is_active") and not user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Inactive user",
+            )
+
+        return user
 
     async def login(
         self,

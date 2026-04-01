@@ -1,7 +1,13 @@
 import pytest
+from fastapi import HTTPException, status
 from fastapi.testclient import TestClient
+from pydantic import BaseModel
 
+from fauth.core import AuthConfig
+from fauth.crypto import hash_password
 from fauth.providers import AuthProvider
+
+from .conftest import DummyUser, FakeUserLoader
 
 
 def test_require_user_expired_token(client: TestClient, expired_token: str) -> None:
@@ -85,3 +91,96 @@ async def test_login_returns_token_response(provider: AuthProvider) -> None:
     assert result.access_token
     assert result.refresh_token
     assert result.token_type == "bearer"
+
+
+@pytest.mark.asyncio
+async def test_authenticate_success(
+    provider: AuthProvider[DummyUser],
+    identity_loader: FakeUserLoader[DummyUser],
+    user: DummyUser,
+) -> None:
+    password = "secret_password"
+    user.hashed_password = hash_password(password)
+    identity_loader.add_user("alice", user)
+
+    authenticated_user = await provider.authenticate("alice", password)
+
+    assert authenticated_user.id_ == user.id_
+    assert authenticated_user.hashed_password == user.hashed_password
+
+
+@pytest.mark.asyncio
+async def test_authenticate_invalid_password(
+    provider: AuthProvider[DummyUser],
+    identity_loader: FakeUserLoader[DummyUser],
+    user: DummyUser,
+) -> None:
+    password = "secret_password"
+    user.hashed_password = hash_password(password)
+    identity_loader.add_user("alice", user)
+
+    with pytest.raises(HTTPException) as excinfo:
+        await provider.authenticate("alice", "wrong_password")
+
+    assert excinfo.value.status_code == status.HTTP_401_UNAUTHORIZED
+    assert excinfo.value.detail == "Invalid credentials"
+
+
+@pytest.mark.asyncio
+async def test_authenticate_unknown_user(provider: AuthProvider[DummyUser]) -> None:
+    with pytest.raises(HTTPException) as excinfo:
+        await provider.authenticate("unknown", "password")
+
+    assert excinfo.value.status_code == status.HTTP_401_UNAUTHORIZED
+    assert excinfo.value.detail == "Invalid credentials"
+
+
+@pytest.mark.asyncio
+async def test_authenticate_inactive_user(
+    provider: AuthProvider[DummyUser],
+    identity_loader: FakeUserLoader[DummyUser],
+    inactive_user: DummyUser,
+) -> None:
+    password = "secret_password"
+    inactive_user.hashed_password = hash_password(password)
+    identity_loader.add_user("alice", inactive_user)
+
+    with pytest.raises(HTTPException) as excinfo:
+        await provider.authenticate("alice", password)
+
+    assert excinfo.value.status_code == status.HTTP_401_UNAUTHORIZED
+    assert excinfo.value.detail == "Inactive user"
+
+
+@pytest.mark.asyncio
+async def test_authenticate_custom_password_field(
+    auth_config: AuthConfig, user_loader: FakeUserLoader[DummyUser]
+) -> None:
+    class CustomUser(BaseModel):
+        id: str
+        pw: str
+
+    ident_loader = FakeUserLoader[CustomUser]()
+    provider = AuthProvider(
+        config=auth_config,
+        user_loader=user_loader,
+        identity_loader=ident_loader,
+        password_field_name="pw",
+    )
+
+    password = "secret_password"
+    hashed = hash_password(password)
+    user = CustomUser(id="user-1", pw=hashed)
+    ident_loader.add_user("alice", user)
+
+    authenticated_user = await provider.authenticate("alice", password)
+    assert authenticated_user.id == "user-1"
+
+
+@pytest.mark.asyncio
+async def test_authenticate_no_loader_raises_error(
+    auth_config: AuthConfig, user_loader: FakeUserLoader[DummyUser]
+) -> None:
+    provider = AuthProvider(config=auth_config, user_loader=user_loader)
+    with pytest.raises(RuntimeError, match="IdentityLoader must be provided"):
+        await provider.authenticate("alice", "password")

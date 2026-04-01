@@ -15,6 +15,7 @@ from fauth.testing import FakeUserLoader
 
 class DummyUser(BaseModel):
     id_: UUID = Field(default_factory=uuid4)
+    hashed_password: str = Field(default="")
     is_active: bool = Field(default=True)
     roles: list[str] = Field(default_factory=list)
     permissions: list[str] = Field(default_factory=list)
@@ -36,10 +37,21 @@ def user_loader() -> FakeUserLoader[DummyUser]:
 
 
 @pytest.fixture
+def identity_loader() -> FakeUserLoader[DummyUser]:
+    return FakeUserLoader()
+
+
+@pytest.fixture
 def provider(
-    auth_config: AuthConfig, user_loader: FakeUserLoader[DummyUser]
+    auth_config: AuthConfig,
+    user_loader: FakeUserLoader[DummyUser],
+    identity_loader: FakeUserLoader[DummyUser],
 ) -> AuthProvider[DummyUser]:
-    return AuthProvider(config=auth_config, user_loader=user_loader)
+    return AuthProvider(
+        config=auth_config,
+        user_loader=user_loader,
+        identity_loader=identity_loader,
+    )
 
 
 @pytest.fixture

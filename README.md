@@ -31,7 +31,8 @@ uv add fauth
 To adopt FAuth, define an async user lookup function (implementing the `UserLoader` protocol), supply an `AuthConfig`, and instantiate the `AuthProvider`. You can then inject the provider directly into FastAPI endpoints.
 
 ```python
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from fauth import AuthConfig, AuthProvider, TokenPayload, SecureAPIRouter
 
@@ -53,30 +54,45 @@ DB: dict[str, User] = {
 async def load_user(payload: TokenPayload) -> User | None:
     return DB.get(payload.sub)
 
-# 3. Instantiate the auth component
+# 3. Define how to fetch a user by username/email for login
+async def load_user_by_identity(identifier: str) -> User | None:
+    # In a real app, this would query your database
+    for user in DB.values():
+        if user.username == identifier:
+            return user
+    return None
+
+# 4. Instantiate the auth component
 config = AuthConfig(secret_key="my-super-secret-key", algorithm="HS256")
-auth: AuthProvider[User] = AuthProvider(config=config, user_loader=load_user)
+auth: AuthProvider[User] = AuthProvider(
+    config=config,
+    user_loader=load_user,
+    identity_loader=load_user_by_identity
+)
 
 # --- Routes ---
 
 @app.post("/login")
-async def login():
-    # 4. Use `auth.login` to issue tokens (password verification omitted)
-    return await auth.login(sub="user-123")
+async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
+    # 4. Use `auth.authenticate` to verify credentials (raises 401 on failure)
+    user = await auth.authenticate(form_data.username, form_data.password)
+
+    # 5. Use `auth.login` to issue tokens
+    return await auth.login(sub=user.id)
 
 @app.get("/me")
 async def get_me(user: User = Depends(auth.require_user)):
-    # 5. `auth.require_user` secures the endpoint automatically
+    # 6. `auth.require_user` secures the endpoint automatically
     return {"message": f"Hello {user.username}"}
 
 @app.get("/admin")
 async def get_admin_data(user: User = Depends(auth.require_roles(["admin"]))):
-    # 6. `auth.require_roles` enforces RBAC with list of roles
+    # 7. `auth.require_roles` enforces RBAC with list of roles
     return {"secret_data": "Top secret admin info"}
 
 # --- Securing Multiple Routes ---
 
-# 7. Use `SecureAPIRouter` to protect an entire group of routes.
+# 8. Use `SecureAPIRouter` to protect an entire group of routes.
 # Any route added to this router will require an active user automatically.
 # This also enables the "Authorize" button in Swagger UI!
 secure_router = SecureAPIRouter(auth_provider=auth, prefix="/internal", tags=["Protected"])
