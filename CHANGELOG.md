@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v0.1.1 (2026-04-01)
+
+### Bug Fixes
+
+- **config**: Simplify dependency injection by using direct method references
+  ([`4438d9e`](https://github.com/justmatias/fauth/commit/4438d9eed561f98e08bc702be0a6a9c132cb5b6b))
+
+### Chores
+
+- **config**: Update pre-commit hooks
+  ([`8f9c9d8`](https://github.com/justmatias/fauth/commit/8f9c9d854a83913b0860b0e9dc2f12ed6f386ef7))
+
+
 ## v0.1.0 (2026-03-29)
 
 ### Bug Fixes
@@ -39,16 +52,19 @@
   ([`c66d1eb`](https://github.com/justmatias/fauth/commit/c66d1eb612a2caebe790d20ce4a7f162ee49b6a4))
 
 - **config**: Update pre-commit hooks
+  ([`6d4ad4f`](https://github.com/justmatias/fauth/commit/6d4ad4f14f337adb73681226353829b19137c451))
+
+- **config**: Update pre-commit hooks
   ([`77a8f95`](https://github.com/justmatias/fauth/commit/77a8f95d330ea0570a04ca8bd5bbccc72554e5e4))
 
 - **config**: Update requirements.txt
   ([`13b718a`](https://github.com/justmatias/fauth/commit/13b718aae048d817191fe26a96b6fd964f59e82a))
 
 - **config**: Update requirements.txt
-  ([`ec11b90`](https://github.com/justmatias/fauth/commit/ec11b90eb30ab24a5b384c5b9662077fea46d903))
+  ([`08fed86`](https://github.com/justmatias/fauth/commit/08fed86e03f8bd6e3ec902dfc1d13225406be4a6))
 
 - **config**: Update requirements.txt
-  ([`08fed86`](https://github.com/justmatias/fauth/commit/08fed86e03f8bd6e3ec902dfc1d13225406be4a6))
+  ([`ec11b90`](https://github.com/justmatias/fauth/commit/ec11b90eb30ab24a5b384c5b9662077fea46d903))
 
 ### Features
 
