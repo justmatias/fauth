@@ -1,6 +1,33 @@
 # CHANGELOG
 
 
+## v0.2.0 (2026-04-02)
+
+### Bug Fixes
+
+- **config**: Add logs and update docs
+  ([`9d9e733`](https://github.com/justmatias/fauth/commit/9d9e7333dc8c541c41d5a80c3bf7bde52ad1f159))
+
+### Chores
+
+- **config**: Update pre-commit hooks
+  ([`f4098cd`](https://github.com/justmatias/fauth/commit/f4098cda011496566cc751305ac7952f4469df03))
+
+- **config**: Update requirements.txt
+  ([`1bef7cc`](https://github.com/justmatias/fauth/commit/1bef7cc6aa3ee9026165ad5bb3e48fc526b853ab))
+
+- **docs**: Clarify structlog configuration requirements
+  ([`9f685cb`](https://github.com/justmatias/fauth/commit/9f685cb8b0190c0b7c9b8ca665b25f4e5816af36))
+
+- **docs**: Update project dependencies in pyproject.toml
+  ([`d49cdbf`](https://github.com/justmatias/fauth/commit/d49cdbf979d63a6b2fbe895c43984c96ae4b721d))
+
+### Features
+
+- **config**: Implement structured logging utility using structlog
+  ([`d87f777`](https://github.com/justmatias/fauth/commit/d87f777795f85e3f2856ad937728f594bc4cc3c1))
+
+
 ## v0.1.2 (2026-04-01)
 
 ### Bug Fixes
