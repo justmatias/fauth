@@ -39,6 +39,8 @@ python-dotenv==1.2.2
     # via pydantic-settings
 starlette==0.52.1
     # via fastapi
+structlog==25.5.0
+    # via fauth (pyproject.toml)
 typing-extensions==4.15.0
     # via
     #   fastapi
