@@ -13,6 +13,7 @@ from fauth.core import (
 )
 from fauth.crypto import create_access_token, create_refresh_token, decode_token
 from fauth.transports import BearerTransport, Transport
+from fauth.utils import logger
 
 from .protocols import UserLoader
 
@@ -44,6 +45,7 @@ class AuthProvider(Generic[T]):
         """Utility to get the currently authenticated user."""
         token = await self.transport(request)
         if not token:
+            await logger.error("Authentication failed", reason="Missing token")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Not authenticated",
@@ -52,29 +54,40 @@ class AuthProvider(Generic[T]):
         try:
             payload = decode_token(token, self.config, self.token_payload_schema)
         except TokenExpiredError as e:
+            await logger.warning("Authentication failed", reason="Token expired")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Token expired",
             ) from e
         except InvalidTokenError as e:
+            await logger.warning("Authentication failed", reason="Invalid token")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid token",
             ) from e
 
+        await logger.debug(
+            "Token decoded", sub=payload.sub, token_type=payload.token_type
+        )
+
         user = await self.user_loader(payload)
         if not user:
+            await logger.warning(
+                "Authentication failed", reason="User not found", sub=payload.sub
+            )
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="User does not exist",
             )
 
+        await logger.debug("User authenticated", sub=payload.sub)
         return user
 
     async def require_active_user(self, request: Request) -> T:
         """Utility to get the currently authenticated active user."""
         user = await self.require_user(request)
         if hasattr(user, "is_active") and not user.is_active:
+            await logger.warning("Authorization failed", reason="Inactive user")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Inactive user",
@@ -91,6 +104,11 @@ class AuthProvider(Generic[T]):
             required_roles = set(roles)
             for role in required_roles:
                 if role not in user_roles:
+                    await logger.error(
+                        "Authorization failed",
+                        reason="Missing role",
+                        required_role=role,
+                    )
                     raise HTTPException(status_code=403, detail=f"Missing role: {role}")
             return user
 
@@ -106,6 +124,11 @@ class AuthProvider(Generic[T]):
             required_permissions = set(permissions)
             for permission in required_permissions:
                 if permission not in user_permissions:
+                    await logger.error(
+                        "Authorization failed",
+                        reason="Missing permission",
+                        required_permission=permission,
+                    )
                     raise HTTPException(
                         status_code=status.HTTP_403_FORBIDDEN,
                         detail=f"Insufficient permissions: requires {permission} permission",
@@ -121,6 +144,7 @@ class AuthProvider(Generic[T]):
         extra: dict[str, Any] | None = None,
     ) -> TokenResponse:
         """Generates access and refresh tokens, bypassing actual pw check (done elsewhere)."""
+        await logger.info("Login token issued", sub=sub)
         access_token = create_access_token(
             sub=sub,
             config=self.config,

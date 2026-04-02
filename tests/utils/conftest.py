@@ -1,6 +1,7 @@
-import structlog.testing
+from collections.abc import Generator
+
 import pytest
-from typing import Generator
+import structlog.testing
 
 from fauth.utils import Logger
 

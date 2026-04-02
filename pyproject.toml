@@ -141,7 +141,7 @@ load-plugins = [
 [tool.poe.tasks]
 format = "pre-commit run --all-files --verbose"
 build = "pip install -e ."
-test = "pytest --cov=fauth --cov-report=term-missing:skip-covered"
+test = "pytest -s --cov=fauth --cov-report=term-missing:skip-covered"
 
 ##################################
 # semantic release configuration #

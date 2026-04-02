@@ -4,31 +4,99 @@ An ergonomic, plug-and-play authentication library for FastAPI.
 
 `fauth` eliminates boilerplate around JWT, password hashing, user fetching, and Role-Based Access Control (RBAC) by leveraging FastAPI's Dependency Injection (`Depends`), Pydantic models, and Python Protocols.
 
+[![PyPI version](https://img.shields.io/pypi/v/fauth)](https://pypi.org/project/fauth/)
+[![Python versions](https://img.shields.io/pypi/pyversions/fauth)](https://pypi.org/project/fauth/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 ## Features
 
-- **Protocol-Based User Fetching**: Complete inversion of control. You implement a simple `UserLoader` protocol to define how to fetch a user from a token payload.
-- **Plug-and-Play Configuration**: Centralized settings via Pydantic (`AuthConfig`). Configure once, inject everywhere.
-- **Pluggable Transports**: Extensible `Transport` protocol with a built-in `BearerTransport` for Authorization header tokens.
-- **Automatic OpenAPI/Swagger UI Support**: Integrated security schemes that automatically show the "Authorize" button and security lock icons in Swagger UI.
-- **Built-in Password Hashing & Crypto**: Uses modern Argon2 via `pwdlib` and includes utilities for creating/decoding JWT access and refresh tokens.
-- **RBAC**: Flexible `require_roles` and `require_permissions` dependencies for endpoint authorization.
-- **Secure Router**: `SecureAPIRouter` applies authentication as a router-level dependency, securing all its routes automatically.
-- **Testing Utilities**: Ships fake implementations (`FakeUserLoader`) and a `build_fake_auth_provider()` factory so consumers can write unit tests with zero boilerplate.
-- **Type Safety**: Fully annotated for MyPy and IDE integration.
+- **Protocol-Based User Fetching** — Complete inversion of control. You implement a simple `UserLoader` protocol to define how to fetch a user from a token payload.
+- **Plug-and-Play Configuration** — Centralized settings via Pydantic (`AuthConfig`). Configure once, inject everywhere.
+- **Pluggable Transports** — Extensible `Transport` protocol with a built-in `BearerTransport` for Authorization header tokens.
+- **Automatic OpenAPI/Swagger UI Support** — Integrated security schemes that automatically show the "Authorize" button and security lock icons in Swagger UI.
+- **Built-in Password Hashing & Crypto** — Modern Argon2 via `pwdlib` and utilities for creating/decoding JWT access and refresh tokens.
+- **RBAC** — Flexible `require_roles` and `require_permissions` dependencies for endpoint authorization.
+- **Secure Router** — `SecureAPIRouter` applies authentication as a router-level dependency, securing all its routes automatically.
+- **Structured Logging** — Built-in `structlog`-based logging for authentication events, token operations, and security failures.
+- **Testing Utilities** — Ships fake implementations (`FakeUserLoader`) and a `build_fake_auth_provider()` factory so consumers can write unit tests with zero boilerplate.
+- **Type Safety** — Fully annotated for MyPy and IDE integration.
 
-## Quick Start
+## Installation
 
 ```bash
 pip install fauth
 ```
 
+Or with [uv](https://github.com/astral-sh/uv):
+
 ```bash
 uv add fauth
 ```
 
-## How to use FAuth
+---
 
-To adopt FAuth, define an async user lookup function (implementing the `UserLoader` protocol), supply an `AuthConfig`, and instantiate the `AuthProvider`. You can then inject the provider directly into FastAPI endpoints.
+## Quick Start
+
+### 1. Define your user model
+
+```python
+from pydantic import BaseModel
+
+class User(BaseModel):
+    id: str
+    username: str
+    is_active: bool = True
+    roles: list[str] = []
+    permissions: list[str] = []
+```
+
+### 2. Implement the `UserLoader` protocol
+
+FAuth uses a callback-based approach to load users. You provide a function that receives a decoded JWT payload and returns your user object:
+
+```python
+from fauth import TokenPayload
+
+# Your database, ORM, or any data source
+DB: dict[str, User] = {
+    "user-123": User(id="user-123", username="alice", roles=["admin"], permissions=["read", "write"]),
+}
+
+async def load_user(payload: TokenPayload) -> User | None:
+    """Look up a user by the `sub` claim from the JWT."""
+    return DB.get(payload.sub)
+```
+
+### 3. Create the AuthProvider
+
+```python
+from fauth import AuthConfig, AuthProvider
+
+config = AuthConfig(secret_key="my-super-secret-key")
+auth: AuthProvider[User] = AuthProvider(config=config, user_loader=load_user)
+```
+
+### 4. Wire it into FastAPI
+
+```python
+from fastapi import FastAPI, Depends
+
+app = FastAPI()
+
+@app.post("/login")
+async def login():
+    return await auth.login(sub="user-123")
+
+@app.get("/me")
+async def get_me(user: User = Depends(auth.require_user)):
+    return {"message": f"Hello {user.username}"}
+```
+
+That's it. The `/me` endpoint is now protected. Requests without a valid `Bearer` token will receive a `401 Unauthorized` response.
+
+---
+
+## Full Example
 
 ```python
 from fastapi import FastAPI, Depends
@@ -43,10 +111,11 @@ class User(BaseModel):
     username: str
     is_active: bool = True
     roles: list[str] = []
+    permissions: list[str] = []
 
 # Mock database
 DB: dict[str, User] = {
-    "user-123": User(id="user-123", username="alice", roles=["admin"])
+    "user-123": User(id="user-123", username="alice", roles=["admin"], permissions=["read", "write"])
 }
 
 # 2. Define the callback that retrieves a user from the decoded JWT
@@ -61,7 +130,7 @@ auth: AuthProvider[User] = AuthProvider(config=config, user_loader=load_user)
 
 @app.post("/login")
 async def login():
-    # 4. Use `auth.login` to issue tokens (password verification omitted)
+    # 4. Use `auth.login` to issue tokens (password verification omitted for now)
     return await auth.login(sub="user-123")
 
 @app.get("/me")
@@ -89,9 +158,167 @@ async def get_dashboard():
 app.include_router(secure_router)
 ```
 
+---
+
+## API Reference
+
+### `AuthConfig`
+
+Centralized authentication settings, powered by [`pydantic-settings`](https://docs.pydantic.dev/latest/concepts/pydantic_settings/). Supports loading values from environment variables out of the box.
+
+| Parameter                      | Type                | Default          | Description                      |
+| ------------------------------ | ------------------- | ---------------- | -------------------------------- |
+| `secret_key`                   | `str`               | _required_       | Secret key used for signing JWTs |
+| `algorithm`                    | `str`               | `"HS256"`        | JWT signing algorithm            |
+| `access_token_expire_minutes`  | `int`               | `15`             | Access token TTL in minutes      |
+| `refresh_token_expire_minutes` | `int`               | `10080` (7 days) | Refresh token TTL in minutes     |
+| `token_type`                   | `Literal["bearer"]` | `"bearer"`       | Token type for responses         |
+
+```python
+from fauth import AuthConfig
+
+# Minimal — only secret_key is required
+config = AuthConfig(secret_key="my-secret-key")
+
+# Full control
+config = AuthConfig(
+    secret_key="my-secret-key",
+    algorithm="HS256",
+    access_token_expire_minutes=30,
+    refresh_token_expire_minutes=60 * 24,  # 1 day
+)
+```
+
+Since `AuthConfig` extends `BaseSettings`, you can also load from environment variables:
+
+```bash
+export SECRET_KEY="my-secret-from-env"
+export ACCESS_TOKEN_EXPIRE_MINUTES=60
+```
+
+```python
+config = AuthConfig()  # Reads from environment
+```
+
+### `AuthProvider[T]`
+
+The main orchestrator. Provides FastAPI dependencies for authentication and authorization.
+
+#### Constructor
+
+```python
+AuthProvider(
+    config: AuthConfig,
+    user_loader: UserLoader[T],
+    transport: Transport | None = None,              # Defaults to BearerTransport()
+    token_payload_schema: type[TokenPayload] = TokenPayload,
+)
+```
+
+#### Methods
+
+| Method                        | Returns         | Description                                                              |
+| ----------------------------- | --------------- | ------------------------------------------------------------------------ |
+| `require_user`                | `T`             | FastAPI dependency — extracts and validates the token, loads the user    |
+| `require_active_user`         | `T`             | Like `require_user`, but also checks `user.is_active`                    |
+| `require_roles(roles)`        | `Callable`      | Returns a dependency that demands the user has all specified roles       |
+| `require_permissions(perms)`  | `Callable`      | Returns a dependency that demands the user has all specified permissions |
+| `login(sub, scopes?, extra?)` | `TokenResponse` | Issues access + refresh tokens for a given subject                       |
+| `get_security_scheme()`       | `SecurityBase`  | Returns the OpenAPI security scheme for docs                             |
+
+### `UserLoader` Protocol
+
+Your application implements this to tell FAuth how to fetch a user from a decoded JWT:
+
+```python
+from fauth import TokenPayload
+
+# As a plain function
+async def load_user(token_payload: TokenPayload) -> User | None:
+    return await db.get_user(token_payload.sub)
+
+# Or as a callable class
+class MyUserLoader:
+    def __init__(self, db: Database):
+        self.db = db
+
+    async def __call__(self, token_payload: TokenPayload) -> User | None:
+        return await self.db.get_user(token_payload.sub)
+```
+
+### `TokenPayload`
+
+The decoded JWT structure. Accepts extra claims via `model_config = ConfigDict(extra="allow")`.
+
+| Field        | Type                           | Description                              |
+| ------------ | ------------------------------ | ---------------------------------------- |
+| `sub`        | `str`                          | Subject (typically user ID)              |
+| `exp`        | `int`                          | Expiry timestamp                         |
+| `iat`        | `int`                          | Issued-at timestamp                      |
+| `jti`        | `str`                          | Unique token ID                          |
+| `scopes`     | `list[str]`                    | Token scopes (defaults to `[]`)          |
+| `token_type` | `Literal["access", "refresh"]` | Distinguishes access from refresh tokens |
+
+### `TokenResponse`
+
+Returned by `auth.login()`:
+
+```python
+{
+    "access_token": "eyJhbGciOiJIUzI1NiIs...",
+    "refresh_token": "eyJhbGciOiJIUzI1NiIs...",
+    "token_type": "bearer"
+}
+```
+
+---
+
+## Crypto Utilities
+
+FAuth exposes standalone functions for direct use outside the `AuthProvider`:
+
+### JWT
+
+```python
+from fauth import create_access_token, create_refresh_token, decode_token, AuthConfig
+
+config = AuthConfig(secret_key="my-secret")
+
+# Create tokens
+access = create_access_token(sub="user-123", config=config)
+refresh = create_refresh_token(sub="user-123", config=config)
+
+# With scopes and extra claims
+access = create_access_token(
+    sub="user-123",
+    config=config,
+    scopes=["read", "write"],
+    extra={"tenant_id": "acme"},
+)
+
+# Decode
+payload = decode_token(access, config)
+print(payload.sub)         # "user-123"
+print(payload.token_type)  # "access"
+print(payload.scopes)      # ["read", "write"]
+```
+
+### Password Hashing
+
+Uses Argon2 via [`pwdlib`](https://github.com/frankie567/pwdlib):
+
+```python
+from fauth import hash_password, verify_password
+
+hashed = hash_password("my-password")
+is_valid = verify_password("my-password", hashed)  # True
+```
+
+---
+
 ## Custom Token Payload
 
-By default, FAuth decodes JWTs into its built-in `TokenPayload` schema. If you need custom claims in your tokens (e.g., `tenant_id`, `organization_id`), subclass `TokenPayload` and pass it to `AuthProvider`:
+If you need custom claims in your tokens (e.g., `tenant_id`, `organization_id`), subclass `TokenPayload` and pass it to `AuthProvider`:
 
 ```python
 from fauth import AuthConfig, AuthProvider, TokenPayload
@@ -107,24 +334,110 @@ auth = AuthProvider(
 )
 ```
 
-When issuing tokens, use the `extra` parameter to encode the custom claims into the JWT:
+When issuing tokens, pass custom claims via the `extra` parameter:
 
 ```python
 await auth.login(sub="user-123", extra={"tenant_id": "acme", "plan": "pro"})
 ```
 
-On the decoding side, your `user_loader` will receive a `MyTokenPayload` instance with fully typed access to `payload.tenant_id` and `payload.plan`.
+Your `user_loader` will then receive a `MyTokenPayload` instance with typed access to `payload.tenant_id` and `payload.plan`.
 
-## Testing your endpoints with FAuth Fakes
+---
 
-FAuth ships with a `fauth.testing` module specifically to simplify testing. No complex JWT mocks or real database dependencies needed — just use `build_fake_auth_provider` to wire up an in-memory auth provider.
+## RBAC (Roles & Permissions)
+
+### Requiring Roles
+
+```python
+@app.get("/admin")
+async def admin_panel(user: User = Depends(auth.require_roles(["admin"]))):
+    return {"message": "Welcome, admin"}
+```
+
+Returns `403 Forbidden` with `{"detail": "Missing role: admin"}` if the user lacks the role.
+
+### Requiring Permissions
+
+```python
+@app.get("/reports")
+async def reports(user: User = Depends(auth.require_permissions(["read", "reports"]))):
+    return {"data": "..."}
+```
+
+Returns `403 Forbidden` with `{"detail": "Insufficient permissions: requires read permission"}` if the user lacks any of the required permissions.
+
+> **Note:** FAuth reads roles/permissions from `user.roles` and `user.permissions` attributes respectively. Make sure your user model exposes these fields.
+
+---
+
+## Custom Transports
+
+By default, FAuth uses `BearerTransport`, which extracts the token from the `Authorization: Bearer <token>` header. You can implement the `Transport` protocol to support other strategies (e.g., cookies):
+
+```python
+from fastapi import Request, Response
+from fastapi.security.base import SecurityBase
+from fauth import Transport
+
+class CookieTransport:
+    async def __call__(self, request: Request) -> str | None:
+        return request.cookies.get("auth_token")
+
+    def set_token_response(self, response: Response, token: str) -> None:
+        response.set_cookie("auth_token", token, httponly=True, samesite="lax")
+
+    def clear_token_response(self, response: Response) -> None:
+        response.delete_cookie("auth_token")
+
+    def get_security_scheme(self) -> SecurityBase:
+        # Return your custom OpenAPI scheme
+        ...
+
+# Use it
+auth = AuthProvider(config=config, user_loader=load_user, transport=CookieTransport())
+```
+
+---
+
+## SecureAPIRouter
+
+`SecureAPIRouter` is a drop-in replacement for `APIRouter` that automatically applies authentication to **all** its routes. It also registers the security scheme in OpenAPI so the "Authorize" button appears in Swagger UI.
+
+```python
+from fauth import SecureAPIRouter
+
+secure_router = SecureAPIRouter(
+    auth_provider=auth,
+    prefix="/api/v1",
+    tags=["Protected"],
+)
+
+@secure_router.get("/dashboard")
+async def dashboard():
+    # Automatically secured — no Depends needed in the function signature
+    return {"data": "protected content"}
+
+@secure_router.get("/settings")
+async def settings():
+    return {"theme": "dark"}
+
+app.include_router(secure_router)
+```
+
+---
+
+## Testing
+
+FAuth ships a `fauth.testing` module to simplify testing. No complex JWT mocks or real database dependencies needed.
+
+### Dependency Override (recommended for unit tests)
 
 ```python
 import pytest
 from fastapi.testclient import TestClient
 from pydantic import BaseModel
 
-from myapp.main import app, auth  # Import your FastAPI app and FAuth instance
+from myapp.main import app, auth
 from fauth.testing import build_fake_auth_provider
 
 class User(BaseModel):
@@ -141,7 +454,7 @@ def test_client() -> TestClient:
     # 2. Wire the fake provider with an in-memory user store
     fake = build_fake_auth_provider(users={"user-123": mock_user})
 
-    # 3. Override the dependency functions.
+    # 3. Override the dependency functions
     app.dependency_overrides[auth.require_user] = fake.require_user
     app.dependency_overrides[auth.require_active_user] = fake.require_active_user
 
@@ -158,7 +471,7 @@ def test_secure_route(test_client):
 
 ### End-to-end testing with real JWT tokens
 
-If you prefer issuing real tokens in tests, `build_fake_auth_provider` uses safe test defaults (a fixed secret key, short expiry) so you can generate tokens without any extra setup.
+If you prefer issuing real tokens in tests, `build_fake_auth_provider` uses safe test defaults (a fixed secret key, short expiry):
 
 ```python
 @pytest.mark.asyncio
@@ -186,3 +499,67 @@ async def test_secure_me_endpoint():
 
     app.dependency_overrides.clear()
 ```
+
+### Testing utilities reference
+
+| Import                                                | Description                                                  |
+| ----------------------------------------------------- | ------------------------------------------------------------ |
+| `build_fake_auth_provider(users?, config_overrides?)` | Creates an `AuthProvider` backed by in-memory fakes          |
+| `fake_auth_config(**overrides)`                       | Returns an `AuthConfig` with safe test defaults              |
+| `FakeUserLoader[T]`                                   | In-memory `UserLoader` — populate with `.add_user(id, user)` |
+
+---
+
+## Structured Logging
+
+FAuth uses [`structlog`](https://www.structlog.org/) for structured, key-value logging across all security-sensitive operations. Logs are emitted automatically — no configuration needed from consumers.
+
+### What gets logged
+
+| Event                   | Level     | Context                                                                        |
+| ----------------------- | --------- | ------------------------------------------------------------------------------ |
+| `login_token_issued`    | `info`    | `sub`                                                                          |
+| `token_decoded`         | `debug`   | `sub`, `token_type`                                                            |
+| `user_authenticated`    | `debug`   | `sub`                                                                          |
+| `authentication_failed` | `warning` | `reason` (`missing_token`, `token_expired`, `invalid_token`, `user_not_found`) |
+| `authorization_failed`  | `warning` | `reason` (`inactive_user`, `missing_role`, `missing_permission`)               |
+
+### Example log output
+
+```
+2026-04-01 10:30:15 [info     ] login_token_issued             sub=user-123
+2026-04-01 10:30:16 [debug    ] token_decoded                  sub=user-123 token_type=access
+2026-04-01 10:30:16 [debug    ] user_authenticated             sub=user-123
+2026-04-01 10:31:00 [warning  ] authentication_failed          reason=token_expired
+2026-04-01 10:32:00 [warning  ] authorization_failed           reason=missing_role required_role=admin
+```
+
+---
+
+## Error Handling
+
+FAuth raises `HTTPException` with standard HTTP status codes:
+
+| Scenario                | Status Code | Detail                                                         |
+| ----------------------- | ----------- | -------------------------------------------------------------- |
+| Missing token           | `401`       | `"Not authenticated"`                                          |
+| Expired token           | `401`       | `"Token expired"`                                              |
+| Invalid/malformed token | `401`       | `"Invalid token"`                                              |
+| User not found          | `401`       | `"User does not exist"`                                        |
+| Inactive user           | `400`       | `"Inactive user"`                                              |
+| Missing role            | `403`       | `"Missing role: {role}"`                                       |
+| Missing permission      | `403`       | `"Insufficient permissions: requires {permission} permission"` |
+
+For programmatic exception handling, FAuth also exposes:
+
+```python
+from fauth import FAuthError, InvalidTokenError, TokenExpiredError
+```
+
+These are raised by the crypto layer (`decode_token`) and can be caught independently of HTTP responses.
+
+---
+
+## License
+
+MIT
