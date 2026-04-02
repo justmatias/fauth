@@ -26,6 +26,7 @@ dependencies = [
     "pydantic>=2.0",
     "pydantic-settings>=2.0",
     "pwdlib[argon2]>=0.2",
+    "structlog>=25.5.0",
 ]
 
 [dependency-groups]
