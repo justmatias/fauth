@@ -45,6 +45,8 @@ dev = [
 Homepage = "https://github.com/justmatias/fauth"
 Repository = "https://github.com/justmatias/fauth"
 Issues = "https://github.com/justmatias/fauth/issues"
+Changelog = "https://github.com/justmatias/fauth/blob/main/CHANGELOG.md"
+Documentation = "https://github.com/justmatias/fauth/blob/main/README.md"
 
 [build-system]
 requires = ["hatchling"]
