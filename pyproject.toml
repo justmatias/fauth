@@ -26,6 +26,7 @@ dependencies = [
     "pydantic>=2.0",
     "pydantic-settings>=2.0",
     "pwdlib[argon2]>=0.2",
+    "structlog>=25.5.0",
 ]
 
 [dependency-groups]
@@ -44,6 +45,8 @@ dev = [
 Homepage = "https://github.com/justmatias/fauth"
 Repository = "https://github.com/justmatias/fauth"
 Issues = "https://github.com/justmatias/fauth/issues"
+Changelog = "https://github.com/justmatias/fauth/blob/main/CHANGELOG.md"
+Documentation = "https://github.com/justmatias/fauth/blob/main/README.md"
 
 [build-system]
 requires = ["hatchling"]
@@ -140,7 +143,7 @@ load-plugins = [
 [tool.poe.tasks]
 format = "pre-commit run --all-files --verbose"
 build = "pip install -e ."
-test = "pytest --cov=fauth --cov-report=term-missing:skip-covered"
+test = "pytest -s --cov=fauth --cov-report=term-missing:skip-covered"
 
 ##################################
 # semantic release configuration #
