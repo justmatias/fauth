@@ -20,11 +20,15 @@ jobs:
       matrix:
         python-version: ['3.12', '3.13', '3.14']
     steps:
+      - uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          fetch-depth: 0
+
       - name: Setup environment
         uses: ./.github/actions/setup-python-env
         with:
           python-version: ${{ matrix.python-version }}
-          gh-token: ${{ secrets.GH_TOKEN }}
 
       - name: Run lint and format checks
         run: uv run poe format
@@ -36,11 +40,15 @@ jobs:
       matrix:
         python-version: ['3.12', '3.13', '3.14']
     steps:
+      - uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          fetch-depth: 0
+
       - name: Setup environment
         uses: ./.github/actions/setup-python-env
         with:
           python-version: ${{ matrix.python-version }}
-          gh-token: ${{ secrets.GH_TOKEN }}
 
       - name: Run unit tests
         env:
@@ -52,12 +60,16 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
       - name: Setup environment
         uses: ./.github/actions/setup-python-env
         with:
           python-version: '3.13'
-          gh-token: ${{ secrets.GH_TOKEN }}
-          checkout-ref: ${{ github.head_ref }}
 
       - name: Autoupdate pre-commit hooks
         run: uv run pre-commit autoupdate
@@ -76,11 +88,16 @@ jobs:
     if: github.ref == 'refs/heads/main'
     needs: [lint, test]
     steps:
+      - uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          ref: main
+          fetch-depth: 0
+
       - name: Setup environment
         uses: ./.github/actions/setup-python-env
         with:
           python-version: '3.13'
-          gh-token: ${{ secrets.GH_TOKEN }}
 
       - name: Bump version and update changelog
         id: release
@@ -100,12 +117,16 @@ jobs:
       name: pypi
       url: https://pypi.org/p/fauth
     steps:
+      - uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          ref: main
+          fetch-depth: 0
+
       - name: Setup environment
         uses: ./.github/actions/setup-python-env
         with:
           python-version: '3.13'
-          gh-token: ${{ secrets.GH_TOKEN }}
-          checkout-ref: main
           install-dependencies: 'false'
 
       - name: Build package

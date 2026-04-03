@@ -1,5 +1,5 @@
 name: 'Setup Python Environment'
-description: 'Checkout, install Python, uv, and project dependencies'
+description: 'Install Python, uv, and project dependencies'
 
 inputs:
   python-version:
@@ -9,17 +9,6 @@ inputs:
     description: 'uv version to install'
     required: false
     default: '0.9.11'
-  gh-token:
-    description: 'GitHub token for checkout'
-    required: true
-  checkout-ref:
-    description: 'Git ref to checkout (leave empty for default)'
-    required: false
-    default: ''
-  fetch-depth:
-    description: 'Number of commits to fetch (0 for full history)'
-    required: false
-    default: '0'
   install-dependencies:
     description: 'Whether to run uv sync after setup'
     required: false
@@ -28,12 +17,6 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - uses: actions/checkout@v6
-      with:
-        token: ${{ inputs.gh-token }}
-        fetch-depth: ${{ inputs.fetch-depth }}
-        ref: ${{ inputs.checkout-ref }}
-
     - name: Set up Python ${{ inputs.python-version }}
       uses: actions/setup-python@v6
       with:

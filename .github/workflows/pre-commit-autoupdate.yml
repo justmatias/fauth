@@ -19,11 +19,15 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          fetch-depth: 0
+
       - name: Setup environment
         uses: ./.github/actions/setup-python-env
         with:
           python-version: '3.13'
-          gh-token: ${{ secrets.GH_TOKEN }}
 
       - name: Autoupdate pre-commit hooks
         run: uv run pre-commit autoupdate
