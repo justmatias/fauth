@@ -31,7 +31,7 @@ class AuthProvider(Generic[T]):
     and returns dependencies for routes.
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments, too-many-positional-arguments
         self,
         config: AuthConfig,
         user_loader: UserLoader[T],

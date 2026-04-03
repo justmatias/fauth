@@ -1,11 +1,12 @@
 import pytest
 from fastapi import HTTPException, status
 from fastapi.testclient import TestClient
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from fauth.core import AuthConfig
 from fauth.crypto import hash_password
 from fauth.providers import AuthProvider
+from fauth.testing import FakeIdentityLoader
 
 from .conftest import DummyUser, FakeUserLoader
 
@@ -94,15 +95,12 @@ async def test_login_returns_token_response(provider: AuthProvider) -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.usefixtures("_populate_identity_user")
 async def test_authenticate_success(
     provider: AuthProvider[DummyUser],
-    identity_loader: FakeUserLoader[DummyUser],
     user: DummyUser,
+    password: str,
 ) -> None:
-    password = "secret_password"
-    user.hashed_password = hash_password(password)
-    identity_loader.add_user("alice", user)
-
     authenticated_user = await provider.authenticate("alice", password)
 
     assert authenticated_user.id_ == user.id_
@@ -110,15 +108,8 @@ async def test_authenticate_success(
 
 
 @pytest.mark.asyncio
-async def test_authenticate_invalid_password(
-    provider: AuthProvider[DummyUser],
-    identity_loader: FakeUserLoader[DummyUser],
-    user: DummyUser,
-) -> None:
-    password = "secret_password"
-    user.hashed_password = hash_password(password)
-    identity_loader.add_user("alice", user)
-
+@pytest.mark.usefixtures("_populate_identity_user")
+async def test_authenticate_invalid_password(provider: AuthProvider[DummyUser]) -> None:
     with pytest.raises(HTTPException) as excinfo:
         await provider.authenticate("alice", "wrong_password")
 
@@ -136,15 +127,11 @@ async def test_authenticate_unknown_user(provider: AuthProvider[DummyUser]) -> N
 
 
 @pytest.mark.asyncio
+@pytest.mark.usefixtures("_populate_identity_inactive_user")
 async def test_authenticate_inactive_user(
     provider: AuthProvider[DummyUser],
-    identity_loader: FakeUserLoader[DummyUser],
-    inactive_user: DummyUser,
+    password: str,
 ) -> None:
-    password = "secret_password"
-    inactive_user.hashed_password = hash_password(password)
-    identity_loader.add_user("alice", inactive_user)
-
     with pytest.raises(HTTPException) as excinfo:
         await provider.authenticate("alice", password)
 
@@ -153,27 +140,24 @@ async def test_authenticate_inactive_user(
 
 
 @pytest.mark.asyncio
-async def test_authenticate_custom_password_field(
-    auth_config: AuthConfig, user_loader: FakeUserLoader[DummyUser]
-) -> None:
+async def test_authenticate_custom_password_field(auth_config: AuthConfig) -> None:
     class CustomUser(BaseModel):
         id: str
-        pw: str
+        pw: str = Field(default=hash_password("secret_password"))
 
-    ident_loader = FakeUserLoader[CustomUser]()
+    identity_loader = FakeIdentityLoader[CustomUser]()
+    user_loader = FakeUserLoader[CustomUser]()
+
     provider = AuthProvider(
         config=auth_config,
         user_loader=user_loader,
-        identity_loader=ident_loader,
+        identity_loader=identity_loader,
         password_field_name="pw",
     )
 
-    password = "secret_password"
-    hashed = hash_password(password)
-    user = CustomUser(id="user-1", pw=hashed)
-    ident_loader.add_user("alice", user)
+    identity_loader.add_user("alice", CustomUser(id="user-1"))
 
-    authenticated_user = await provider.authenticate("alice", password)
+    authenticated_user = await provider.authenticate("alice", "secret_password")
     assert authenticated_user.id == "user-1"
 
 

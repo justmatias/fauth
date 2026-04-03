@@ -8,14 +8,14 @@ from fastapi.testclient import TestClient
 from pydantic import BaseModel, Field
 
 from fauth.core import AuthConfig
-from fauth.crypto import create_access_token
+from fauth.crypto import create_access_token, hash_password
 from fauth.providers import AuthProvider
-from fauth.testing import FakeUserLoader
+from fauth.testing import FakeIdentityLoader, FakeUserLoader
 
 
 class DummyUser(BaseModel):
     id_: UUID = Field(default_factory=uuid4)
-    hashed_password: str = Field(default="")
+    hashed_password: str = Field(default=hash_password("secret_password"))
     is_active: bool = Field(default=True)
     roles: list[str] = Field(default_factory=list)
     permissions: list[str] = Field(default_factory=list)
@@ -37,15 +37,15 @@ def user_loader() -> FakeUserLoader[DummyUser]:
 
 
 @pytest.fixture
-def identity_loader() -> FakeUserLoader[DummyUser]:
-    return FakeUserLoader()
+def identity_loader() -> FakeIdentityLoader[DummyUser]:
+    return FakeIdentityLoader()
 
 
 @pytest.fixture
 def provider(
     auth_config: AuthConfig,
     user_loader: FakeUserLoader[DummyUser],
-    identity_loader: FakeUserLoader[DummyUser],
+    identity_loader: FakeIdentityLoader[DummyUser],
 ) -> AuthProvider[DummyUser]:
     return AuthProvider(
         config=auth_config,
@@ -157,3 +157,22 @@ def _populate_no_perms_user(
 @pytest.fixture
 def no_perms_user_token(auth_config: AuthConfig, no_perms_user: DummyUser) -> str:
     return create_access_token(sub=str(no_perms_user.id_), config=auth_config)
+
+
+@pytest.fixture
+def _populate_identity_user(
+    identity_loader: FakeIdentityLoader[DummyUser], user: DummyUser
+) -> None:
+    identity_loader.add_user("alice", user)
+
+
+@pytest.fixture
+def _populate_identity_inactive_user(
+    identity_loader: FakeIdentityLoader[DummyUser], inactive_user: DummyUser
+) -> None:
+    identity_loader.add_user("alice", inactive_user)
+
+
+@pytest.fixture
+def password() -> str:
+    return "secret_password"
