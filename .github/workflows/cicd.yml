@@ -13,8 +13,11 @@ permissions:
 
 jobs:
   lint:
-    name: Lint
+    name: Lint (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.12', '3.13', '3.14']
     steps:
       - uses: actions/checkout@v6
         env:
@@ -23,16 +26,16 @@ jobs:
           token: ${{ env.GH_TOKEN }}
           fetch-depth: 0
 
-      - name: Set up Python 3.13
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v6
         with:
-          python-version: '3.13'
+          python-version: '${{ matrix.python-version }}'
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
         with:
           version: '0.9.11'
-          python-version: '3.13'
+          python-version: '${{ matrix.python-version }}'
 
       - name: Install dependencies
         run: |
@@ -44,24 +47,27 @@ jobs:
           uv run poe format
 
   test:
-    name: Test
+    name: Test (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.12', '3.13', '3.14']
     steps:
       - uses: actions/checkout@v6
         with:
           token: ${{ secrets.GH_TOKEN }}
           fetch-depth: 0
 
-      - name: Set up Python 3.13
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v6
         with:
-          python-version: '3.13'
+          python-version: '${{ matrix.python-version }}'
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
         with:
           version: '0.9.11'
-          python-version: '3.13'
+          python-version: '${{ matrix.python-version }}'
 
       - name: Install dependencies
         run: |
@@ -84,16 +90,16 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.head_ref }}
 
-      - name: Set up Python 3.13
+      - name: Set up Python 3.12
         uses: actions/setup-python@v6
         with:
-          python-version: '3.13'
+          python-version: '3.12'
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
         with:
           version: '0.9.11'
-          python-version: '3.13'
+          python-version: '3.12'
 
       - name: Install dependencies
         run: |
