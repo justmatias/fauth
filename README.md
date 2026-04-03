@@ -45,26 +45,37 @@ from pydantic import BaseModel
 class User(BaseModel):
     id: str
     username: str
+    hashed_password: str
     is_active: bool = True
     roles: list[str] = []
     permissions: list[str] = []
 ```
 
-### 2. Implement the `UserLoader` protocol
+### 2. Implement the `UserLoader` and `IdentityLoader` protocols
 
-FAuth uses a callback-based approach to load users. You provide a function that receives a decoded JWT payload and returns your user object:
+FAuth uses a callback-based approach. You provide functions that retrieve users from your data source:
 
 ```python
-from fauth import TokenPayload
+from fauth import TokenPayload, hash_password
 
 # Your database, ORM, or any data source
 DB: dict[str, User] = {
-    "user-123": User(id="user-123", username="alice", roles=["admin"], permissions=["read", "write"]),
+    "user-123": User(
+        id="user-123",
+        username="alice",
+        hashed_password=hash_password("s3cret"),
+        roles=["admin"],
+        permissions=["read", "write"],
+    ),
 }
 
+# UserLoader — resolves a user from a decoded JWT
 async def load_user(payload: TokenPayload) -> User | None:
-    """Look up a user by the `sub` claim from the JWT."""
     return DB.get(payload.sub)
+
+# IdentityLoader — resolves a user by identifier (for password authentication)
+async def load_identity(identifier: str) -> User | None:
+    return next((u for u in DB.values() if u.username == identifier), None)
 ```
 
 ### 3. Create the AuthProvider
@@ -73,7 +84,11 @@ async def load_user(payload: TokenPayload) -> User | None:
 from fauth import AuthConfig, AuthProvider
 
 config = AuthConfig(secret_key="my-super-secret-key")
-auth: AuthProvider[User] = AuthProvider(config=config, user_loader=load_user)
+auth: AuthProvider[User] = AuthProvider(
+    config=config,
+    user_loader=load_user,
+    identity_loader=load_identity,
+)
 ```
 
 ### 4. Wire it into FastAPI
@@ -84,15 +99,16 @@ from fastapi import FastAPI, Depends
 app = FastAPI()
 
 @app.post("/login")
-async def login():
-    return await auth.login(sub="user-123")
+async def login(username: str, password: str):
+    user = await auth.authenticate(username, password)
+    return await auth.login(sub=user.id)
 
 @app.get("/me")
 async def get_me(user: User = Depends(auth.require_user)):
     return {"message": f"Hello {user.username}"}
 ```
 
-That's it. The `/me` endpoint is now protected. Requests without a valid `Bearer` token will receive a `401 Unauthorized` response.
+That's it. The `/login` endpoint verifies credentials via `authenticate()`, then issues tokens via `login()`. The `/me` endpoint is protected — requests without a valid `Bearer` token will receive a `401 Unauthorized` response.
 
 ---
 
@@ -102,7 +118,7 @@ That's it. The `/me` endpoint is now protected. Requests without a valid `Bearer
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
-from fauth import AuthConfig, AuthProvider, TokenPayload, SecureAPIRouter
+from fauth import AuthConfig, AuthProvider, TokenPayload, SecureAPIRouter, hash_password
 
 app = FastAPI()
 
@@ -110,41 +126,50 @@ app = FastAPI()
 class User(BaseModel):
     id: str
     username: str
+    hashed_password: str
     is_active: bool = True
     roles: list[str] = []
     permissions: list[str] = []
 
-# Mock database
+# Mock databases
 DB: dict[str, User] = {
-    "user-123": User(id="user-123", username="alice", roles=["admin"], permissions=["read", "write"])
+    "user-123": User(
+        id="user-123",
+        username="alice",
+        hashed_password=hash_password("s3cret"),
+        roles=["admin"],
+        permissions=["read", "write"],
+    )
+}
+
+# Identity lookup by username (used by authenticate)
+IDENTITY_DB: dict[str, User] = {
+    "alice": DB["user-123"],
 }
 
 # 2. Define the callback that retrieves a user from the decoded JWT
 async def load_user(payload: TokenPayload) -> User | None:
     return DB.get(payload.sub)
 
-# 3. Define how to fetch a user by username/email for login
-async def load_user_by_identity(identifier: str) -> User | None:
-    # In a real app, this would query your database
-    for user in DB.values():
-        if user.username == identifier:
-            return user
-    return None
+# 3. Define the callback that retrieves a user by identifier (for password auth)
+async def load_identity(identifier: str) -> User | None:
+    return IDENTITY_DB.get(identifier)
 
 # 4. Instantiate the auth component
 config = AuthConfig(secret_key="my-super-secret-key", algorithm="HS256")
 auth: AuthProvider[User] = AuthProvider(
     config=config,
     user_loader=load_user,
-    identity_loader=load_user_by_identity
+    identity_loader=load_identity,
 )
 
 # --- Routes ---
 
 @app.post("/login")
-async def login():
-    # 4. Use `auth.login` to issue tokens (password verification omitted for now)
-    return await auth.login(sub="user-123")
+async def login(username: str, password: str):
+    # 5. Verify credentials, then issue tokens
+    user = await auth.authenticate(username, password)
+    return await auth.login(sub=user.id)
 
 @app.get("/me")
 async def get_me(user: User = Depends(auth.require_user)):
@@ -223,21 +248,24 @@ The main orchestrator. Provides FastAPI dependencies for authentication and auth
 AuthProvider(
     config: AuthConfig,
     user_loader: UserLoader[T],
-    transport: Transport | None = None,              # Defaults to BearerTransport()
+    identity_loader: IdentityLoader[T] | None = None, # Required for authenticate()
+    transport: Transport | None = None,               # Defaults to BearerTransport()
     token_payload_schema: type[TokenPayload] = TokenPayload,
+    password_field_name: str = "hashed_password",      # Attribute on user model holding the hash
 )
 ```
 
 #### Methods
 
-| Method                        | Returns         | Description                                                              |
-| ----------------------------- | --------------- | ------------------------------------------------------------------------ |
-| `require_user`                | `T`             | FastAPI dependency — extracts and validates the token, loads the user    |
-| `require_active_user`         | `T`             | Like `require_user`, but also checks `user.is_active`                    |
-| `require_roles(roles)`        | `Callable`      | Returns a dependency that demands the user has all specified roles       |
-| `require_permissions(perms)`  | `Callable`      | Returns a dependency that demands the user has all specified permissions |
-| `login(sub, scopes?, extra?)` | `TokenResponse` | Issues access + refresh tokens for a given subject                       |
-| `get_security_scheme()`       | `SecurityBase`  | Returns the OpenAPI security scheme for docs                             |
+| Method                              | Returns         | Description                                                              |
+| ----------------------------------- | --------------- | ------------------------------------------------------------------------ |
+| `require_user`                      | `T`             | FastAPI dependency — extracts and validates the token, loads the user    |
+| `require_active_user`               | `T`             | Like `require_user`, but also checks `user.is_active`                    |
+| `require_roles(roles)`              | `Callable`      | Returns a dependency that demands the user has all specified roles       |
+| `require_permissions(perms)`        | `Callable`      | Returns a dependency that demands the user has all specified permissions |
+| `authenticate(identifier, password)`| `T`             | Verifies credentials via `IdentityLoader` + password check              |
+| `login(sub, scopes?, extra?)`       | `TokenResponse` | Issues access + refresh tokens for a given subject                       |
+| `get_security_scheme()`             | `SecurityBase`  | Returns the OpenAPI security scheme for docs                             |
 
 ### `UserLoader` Protocol
 
@@ -257,6 +285,24 @@ class MyUserLoader:
 
     async def __call__(self, token_payload: TokenPayload) -> User | None:
         return await self.db.get_user(token_payload.sub)
+```
+
+### `IdentityLoader` Protocol
+
+Used by `authenticate()` to look up a user by an identifier (username, email, etc.):
+
+```python
+# As a plain function
+async def load_identity(identifier: str) -> User | None:
+    return await db.get_user_by_username(identifier)
+
+# Or as a callable class
+class MyIdentityLoader:
+    def __init__(self, db: Database):
+        self.db = db
+
+    async def __call__(self, identifier: str) -> User | None:
+        return await self.db.get_user_by_username(identifier)
 ```
 
 ### `TokenPayload`
@@ -326,6 +372,78 @@ from fauth import hash_password, verify_password
 hashed = hash_password("my-password")
 is_valid = verify_password("my-password", hashed)  # True
 ```
+
+---
+
+## Authentication with Password Verification
+
+FAuth provides a built-in `authenticate()` method on `AuthProvider` that handles credential verification using the `IdentityLoader` protocol and Argon2 password hashing.
+
+### Basic setup
+
+```python
+from pydantic import BaseModel
+from fauth import AuthConfig, AuthProvider, hash_password
+
+class User(BaseModel):
+    id: str
+    username: str
+    hashed_password: str
+    is_active: bool = True
+
+# Identity loader retrieves user by username/email/etc.
+async def load_identity(identifier: str) -> User | None:
+    return await db.get_user_by_username(identifier)
+
+# Token-based user loader (used by require_user)
+async def load_user(payload) -> User | None:
+    return await db.get_user_by_id(payload.sub)
+
+auth = AuthProvider(
+    config=AuthConfig(secret_key="my-secret"),
+    user_loader=load_user,
+    identity_loader=load_identity,
+)
+```
+
+### Using `authenticate()` in a login endpoint
+
+```python
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.post("/login")
+async def login(username: str, password: str):
+    # Verifies password and checks is_active
+    user = await auth.authenticate(username, password)
+    # Issue tokens
+    return await auth.login(sub=user.id)
+```
+
+`authenticate()` performs three checks in order:
+1. **User exists** — looks up the user via `IdentityLoader`. Raises `401` if not found.
+2. **Password is valid** — verifies the plain password against the hashed password stored on the user. Raises `401` if invalid.
+3. **User is active** — checks `user.is_active` (if the attribute exists). Raises `401` if inactive.
+
+### Custom password field
+
+By default, `authenticate()` reads the hash from `user.hashed_password`. If your model stores it under a different attribute name, pass `password_field_name`:
+
+```python
+class User(BaseModel):
+    id: str
+    pw_hash: str  # non-standard field name
+
+auth = AuthProvider(
+    config=config,
+    user_loader=load_user,
+    identity_loader=load_identity,
+    password_field_name="pw_hash",
+)
+```
+
+> **Note:** If `AuthProvider` is created without an `identity_loader`, calling `authenticate()` will raise a `RuntimeError`.
 
 ---
 
@@ -515,11 +633,12 @@ async def test_secure_me_endpoint():
 
 ### Testing utilities reference
 
-| Import                                                | Description                                                  |
-| ----------------------------------------------------- | ------------------------------------------------------------ |
-| `build_fake_auth_provider(users?, config_overrides?)` | Creates an `AuthProvider` backed by in-memory fakes          |
-| `fake_auth_config(**overrides)`                       | Returns an `AuthConfig` with safe test defaults              |
-| `FakeUserLoader[T]`                                   | In-memory `UserLoader` — populate with `.add_user(id, user)` |
+| Import                                                | Description                                                           |
+| ----------------------------------------------------- | --------------------------------------------------------------------- |
+| `build_fake_auth_provider(users?, config_overrides?)` | Creates an `AuthProvider` backed by in-memory fakes                   |
+| `fake_auth_config(**overrides)`                       | Returns an `AuthConfig` with safe test defaults                       |
+| `FakeUserLoader[T]`                                   | In-memory `UserLoader` — populate with `.add_user(id, user)`          |
+| `FakeIdentityLoader[T]`                               | In-memory `IdentityLoader` — populate with `.add_user(id, user)`      |
 
 ---
 
@@ -592,7 +711,9 @@ FAuth raises `HTTPException` with standard HTTP status codes:
 | Expired token           | `401`       | `"Token expired"`                                              |
 | Invalid/malformed token | `401`       | `"Invalid token"`                                              |
 | User not found          | `401`       | `"User does not exist"`                                        |
-| Inactive user           | `400`       | `"Inactive user"`                                              |
+| Invalid credentials     | `401`       | `"Invalid credentials"` (from `authenticate()`)               |
+| Inactive user (token)   | `400`       | `"Inactive user"` (from `require_active_user`)                |
+| Inactive user (login)   | `401`       | `"Inactive user"` (from `authenticate()`)                     |
 | Missing role            | `403`       | `"Missing role: {role}"`                                       |
 | Missing permission      | `403`       | `"Insufficient permissions: requires {permission} permission"` |
 
