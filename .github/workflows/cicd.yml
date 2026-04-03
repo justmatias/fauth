@@ -9,6 +9,7 @@ on:
 permissions:
   id-token: write
   contents: write
+  pull-requests: write
   actions: write
 
 jobs:
@@ -19,32 +20,14 @@ jobs:
       matrix:
         python-version: ['3.12', '3.13', '3.14']
     steps:
-      - uses: actions/checkout@v6
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      - name: Setup environment
+        uses: ./.github/actions/setup-python-env
         with:
-          token: ${{ env.GH_TOKEN }}
-          fetch-depth: 0
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
-        with:
-          python-version: '${{ matrix.python-version }}'
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-        with:
-          version: '0.9.11'
-          python-version: '${{ matrix.python-version }}'
-
-      - name: Install dependencies
-        run: |
-          uv sync --all-groups --frozen
+          python-version: ${{ matrix.python-version }}
+          gh-token: ${{ secrets.GH_TOKEN }}
 
       - name: Run lint and format checks
-        id: format
-        run: |
-          uv run poe format
+        run: uv run poe format
 
   test:
     name: Test (Python ${{ matrix.python-version }})
@@ -53,68 +36,38 @@ jobs:
       matrix:
         python-version: ['3.12', '3.13', '3.14']
     steps:
-      - uses: actions/checkout@v6
+      - name: Setup environment
+        uses: ./.github/actions/setup-python-env
         with:
-          token: ${{ secrets.GH_TOKEN }}
-          fetch-depth: 0
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
-        with:
-          python-version: '${{ matrix.python-version }}'
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-        with:
-          version: '0.9.11'
-          python-version: '${{ matrix.python-version }}'
-
-      - name: Install dependencies
-        run: |
-          uv sync --all-groups --frozen
+          python-version: ${{ matrix.python-version }}
+          gh-token: ${{ secrets.GH_TOKEN }}
 
       - name: Run unit tests
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
-        run: |
-          uv run poe test
+        run: uv run poe test
 
-  requirements:
-    name: Requirements
-    if: github.ref != 'refs/heads/main'
+  update-hooks:
+    name: Update pre-commit hooks
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - name: Setup environment
+        uses: ./.github/actions/setup-python-env
         with:
-          token: ${{ secrets.GH_TOKEN }}
-          fetch-depth: 0
-          ref: ${{ github.head_ref }}
+          python-version: '3.13'
+          gh-token: ${{ secrets.GH_TOKEN }}
+          checkout-ref: ${{ github.head_ref }}
 
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v6
-        with:
-          python-version: '3.12'
+      - name: Autoupdate pre-commit hooks
+        run: uv run pre-commit autoupdate
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-        with:
-          version: '0.9.11'
-          python-version: '3.12'
-
-      - name: Install dependencies
-        run: |
-          uv sync --all-groups --frozen
-
-      - name: Generate requirements.txt
-        run: |
-          uv pip compile pyproject.toml -o requirements.txt
-
-      - name: Commit and push requirements.txt
+      - name: Commit updated hooks
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add requirements.txt
-          git diff --staged --quiet || git commit -m "chore(config): update requirements.txt"
+          git add .pre-commit-config.yaml
+          git diff --staged --quiet || git commit -m "chore(config): update pre-commit hooks"
           git push origin HEAD:${{ github.head_ref }}
 
   versioning:
@@ -123,27 +76,11 @@ jobs:
     if: github.ref == 'refs/heads/main'
     needs: [lint, test]
     steps:
-      - uses: actions/checkout@v6
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        with:
-          token: ${{ env.GH_TOKEN }}
-          fetch-depth: 0
-
-      - name: Set up Python 3.13
-        uses: actions/setup-python@v6
+      - name: Setup environment
+        uses: ./.github/actions/setup-python-env
         with:
           python-version: '3.13'
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-        with:
-          version: '0.9.11'
-          python-version: '3.13'
-
-      - name: Install dependencies
-        run: |
-          uv sync --all-groups --frozen
+          gh-token: ${{ secrets.GH_TOKEN }}
 
       - name: Bump version and update changelog
         id: release
@@ -163,22 +100,13 @@ jobs:
       name: pypi
       url: https://pypi.org/p/fauth
     steps:
-      - uses: actions/checkout@v6
-        with:
-          token: ${{ secrets.GH_TOKEN }}
-          ref: main
-          fetch-depth: 0
-
-      - name: Set up Python 3.13
-        uses: actions/setup-python@v6
+      - name: Setup environment
+        uses: ./.github/actions/setup-python-env
         with:
           python-version: '3.13'
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-        with:
-          version: '0.9.11'
-          python-version: '3.13'
+          gh-token: ${{ secrets.GH_TOKEN }}
+          checkout-ref: main
+          install-dependencies: 'false'
 
       - name: Build package
         run: uv build

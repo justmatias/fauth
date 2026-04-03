@@ -1,0 +1,51 @@
+name: 'Setup Python Environment'
+description: 'Checkout, install Python, uv, and project dependencies'
+
+inputs:
+  python-version:
+    description: 'Python version to set up'
+    required: true
+  uv-version:
+    description: 'uv version to install'
+    required: false
+    default: '0.9.11'
+  gh-token:
+    description: 'GitHub token for checkout'
+    required: true
+  checkout-ref:
+    description: 'Git ref to checkout (leave empty for default)'
+    required: false
+    default: ''
+  fetch-depth:
+    description: 'Number of commits to fetch (0 for full history)'
+    required: false
+    default: '0'
+  install-dependencies:
+    description: 'Whether to run uv sync after setup'
+    required: false
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/checkout@v6
+      with:
+        token: ${{ inputs.gh-token }}
+        fetch-depth: ${{ inputs.fetch-depth }}
+        ref: ${{ inputs.checkout-ref }}
+
+    - name: Set up Python ${{ inputs.python-version }}
+      uses: actions/setup-python@v6
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v7
+      with:
+        version: ${{ inputs.uv-version }}
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install dependencies
+      if: inputs.install-dependencies == 'true'
+      shell: bash
+      run: uv sync --all-groups --frozen
