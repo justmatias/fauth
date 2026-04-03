@@ -90,16 +90,16 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.head_ref }}
 
-      - name: Set up Python 3.13
+      - name: Set up Python 3.12
         uses: actions/setup-python@v6
         with:
-          python-version: '3.13'
+          python-version: '3.12'
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
         with:
           version: '0.9.11'
-          python-version: '3.13'
+          python-version: '3.12'
 
       - name: Install dependencies
         run: |
