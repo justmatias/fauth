@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v0.2.1 (2026-04-03)
+
+### Bug Fixes
+
+- Implement AuthProvider for FastAPI authentication and add testing utilities
+  ([`f19f7ad`](https://github.com/justmatias/fauth/commit/f19f7ad32a8a79368d50862ffa3f4446dcc2cc70))
+
+### Chores
+
+- **config**: Merge with main
+  ([`d8caae2`](https://github.com/justmatias/fauth/commit/d8caae2b3e357fcc2b3bc5f78c2929c1d0b12427))
+
+
 ## v0.2.0 (2026-04-02)
 
 ### Bug Fixes
@@ -31,6 +44,9 @@
 ## v0.1.2 (2026-04-01)
 
 ### Bug Fixes
+
+- **config**: Add authenticate method to AuthProvider with IdentityLoader support
+  ([`f905766`](https://github.com/justmatias/fauth/commit/f905766afa02394a28f97b319e52134576c4c614))
 
 - **config**: Add openapi security scheme support to AuthProvider and router dependencies
   ([`72d7754`](https://github.com/justmatias/fauth/commit/72d7754fb0519be979b6b00b5f253b245770698c))
