@@ -1,6 +1,6 @@
 # FAuth
 
-An ergonomic, plug-and-play authentication library for FastAPI.
+An ergonomic, plug-and-play authentication library for FastAPI
 
 `fauth` eliminates boilerplate around JWT, password hashing, user fetching, and Role-Based Access Control (RBAC) by leveraging FastAPI's Dependency Injection (`Depends`), Pydantic models, and Python Protocols.
 
