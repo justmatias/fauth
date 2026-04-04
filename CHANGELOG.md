@@ -1,6 +1,56 @@
 # CHANGELOG
 
 
+## v0.2.2 (2026-04-04)
+
+### Bug Fixes
+
+- Add badge for dependabot
+  ([`22f4719`](https://github.com/justmatias/fauth/commit/22f47195a489fbd9a63f5772c1081b887a2b0ea1))
+
+### Chores
+
+- Add python version matrix to CI/CD workflow
+  ([`9576512`](https://github.com/justmatias/fauth/commit/9576512733ed709c9bce62a97101d397a010ace8))
+
+- Fix cicd for dependabot prs
+  ([`befb729`](https://github.com/justmatias/fauth/commit/befb729fca3e37ba23c5158b29659f712455f6ac))
+
+- Implement setup env action and remove legacy requirements.txt
+  ([`781a552`](https://github.com/justmatias/fauth/commit/781a552e29c3d658247762c5cf13bb66042976fb))
+
+- Remove extract curly brace
+  ([`2661dd3`](https://github.com/justmatias/fauth/commit/2661dd3f94da79909fa900d6d6dc341e199f5bb4))
+
+- Restore checkout step in jobs
+  ([`ad4e33d`](https://github.com/justmatias/fauth/commit/ad4e33d1b2575f368b7cb256c1bf9d34b52855dd))
+
+- Set python version to min supported
+  ([`8c981a4`](https://github.com/justmatias/fauth/commit/8c981a40939df8230ba1f776cf1dc6f57090ebad))
+
+- **config**: Update pre-commit hooks
+  ([`ab09f61`](https://github.com/justmatias/fauth/commit/ab09f6185058cece84ddf5ef371b268b7fb75429))
+
+- **config**: Update pre-commit hooks
+  ([`6ec7a6d`](https://github.com/justmatias/fauth/commit/6ec7a6de9c618d1d5bf8b0f157d52888346f49a1))
+
+- **config**: Update requirements.txt
+  ([`862978f`](https://github.com/justmatias/fauth/commit/862978f8073c065086b3080dafc45e3b604b98ce))
+
+- **deps**: Bump cryptography from 46.0.5 to 46.0.6
+  ([`a61129d`](https://github.com/justmatias/fauth/commit/a61129df6777736ecff5df4c1a878a70b378025d))
+
+Bumps [cryptography](https://github.com/pyca/cryptography) from 46.0.5 to 46.0.6. -
+  [Changelog](https://github.com/pyca/cryptography/blob/main/CHANGELOG.rst) -
+  [Commits](https://github.com/pyca/cryptography/compare/46.0.5...46.0.6)
+
+--- updated-dependencies: - dependency-name: cryptography dependency-version: 46.0.6
+
+dependency-type: indirect ...
+
+Signed-off-by: dependabot[bot] <support@github.com>
+
+
 ## v0.2.1 (2026-04-03)
 
 ### Bug Fixes
