@@ -4,6 +4,7 @@ An ergonomic, plug-and-play authentication library for FastAPI.
 
 `fauth` eliminates boilerplate around JWT, password hashing, user fetching, and Role-Based Access Control (RBAC) by leveraging FastAPI's Dependency Injection (`Depends`), Pydantic models, and Python Protocols.
 
+[![Dependabot Updates](https://github.com/justmatias/fauth/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/justmatias/fauth/actions/workflows/dependabot/dependabot-updates)
 [![PyPI version](https://img.shields.io/pypi/v/fauth)](https://pypi.org/project/fauth/)
 [![Python versions](https://img.shields.io/pypi/pyversions/fauth)](https://pypi.org/project/fauth/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
