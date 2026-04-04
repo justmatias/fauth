@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: ['main']
+    branches: ["main"]
   pull_request:
-    branches: ['main']
+    branches: ["main"]
 
 permissions:
   id-token: write
@@ -18,11 +18,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.12', '3.13', '3.14']
+        python-version: ["3.12", "3.13", "3.14"]
     steps:
       - uses: actions/checkout@v6
         with:
-          token: ${{ secrets.GH_TOKEN }}
+          token: ${{ secrets.GH_TOKEN || secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
       - name: Setup environment
@@ -38,11 +38,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.12', '3.13', '3.14']
+        python-version: ["3.12", "3.13", "3.14"]
     steps:
       - uses: actions/checkout@v6
         with:
-          token: ${{ secrets.GH_TOKEN }}
+          token: ${{ secrets.GH_TOKEN || secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
       - name: Setup environment
@@ -62,14 +62,14 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          token: ${{ secrets.GH_TOKEN }}
+          token: ${{ secrets.GH_TOKEN || secrets.GITHUB_TOKEN }}
           ref: ${{ github.head_ref }}
           fetch-depth: 0
 
       - name: Setup environment
         uses: ./.github/actions/setup-python-env
         with:
-          python-version: '3.13'
+          python-version: "3.13"
 
       - name: Autoupdate pre-commit hooks
         run: uv run pre-commit autoupdate
@@ -90,20 +90,20 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          token: ${{ secrets.GH_TOKEN }}
+          token: ${{ secrets.GH_TOKEN || secrets.GITHUB_TOKEN }}}
           ref: main
           fetch-depth: 0
 
       - name: Setup environment
         uses: ./.github/actions/setup-python-env
         with:
-          python-version: '3.13'
+          python-version: "3.13"
 
       - name: Bump version and update changelog
         id: release
         uses: python-semantic-release/python-semantic-release@v9.21.1
         with:
-          github_token: ${{ secrets.GH_TOKEN }}
+          github_token: ${{ secrets.GH_TOKEN || secrets.GITHUB_TOKEN }}
 
     outputs:
       released: ${{ steps.release.outputs.released }}
@@ -119,15 +119,15 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          token: ${{ secrets.GH_TOKEN }}
+          token: ${{ secrets.GH_TOKEN || secrets.GITHUB_TOKEN }}
           ref: main
           fetch-depth: 0
 
       - name: Setup environment
         uses: ./.github/actions/setup-python-env
         with:
-          python-version: '3.13'
-          install-dependencies: 'false'
+          python-version: "3.13"
+          install-dependencies: "false"
 
       - name: Build package
         run: uv build
