@@ -44,7 +44,7 @@ repos:
           - fastapi==0.135.1
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.20.0
+    rev: v1.20.1
     hooks:
       - id: mypy
         additional_dependencies:
