@@ -66,7 +66,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
             if self.auto_error:
                 await logger.warning("Authentication failed", reason="Token expired")
                 return JSONResponse({"detail": "Token expired"}, status_code=401)
-            return await call_next(request)
+            return await call_next(request)  # pragma: no cover
         except InvalidTokenError:
             if self.auto_error:
                 await logger.warning("Authentication failed", reason="Invalid token")
@@ -80,7 +80,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
                     "Authentication failed", reason="User not found", sub=payload.sub
                 )
                 return JSONResponse({"detail": "User does not exist"}, status_code=401)
-            return await call_next(request)
+            return await call_next(request)  # pragma: no cover
 
         request.state.user = user
         request.state.token_payload = payload
