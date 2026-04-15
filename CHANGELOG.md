@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v0.4.0 (2026-04-15)
+
+### Chores
+
+- Add pragma no cover to auth middleware fallback paths
+  ([`cd3c090`](https://github.com/justmatias/fauth/commit/cd3c09037e7459126c01310c34b09ea2e7f4ece0))
+
+### Features
+
+- Implement token refresh functionality in AuthProvider with associated tests
+  ([`d597d8f`](https://github.com/justmatias/fauth/commit/d597d8ff96a240c502755e4fc80e7ef316121713))
+
+
 ## v0.3.1 (2026-04-15)
 
 ### Bug Fixes
