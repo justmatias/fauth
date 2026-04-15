@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.3.1 (2026-04-15)
+
+### Bug Fixes
+
+- Add py.typed marker to enable type checking support
+  ([`1787519`](https://github.com/justmatias/fauth/commit/1787519027c7dfd6e57e1fddad45b7cdffe97e48))
+
+
 ## v0.3.0 (2026-04-15)
 
 ### Bug Fixes
