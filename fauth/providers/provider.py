@@ -51,7 +51,15 @@ class AuthProvider(Generic[T]):
         self.transport = transport
 
     async def require_user(self, request: Request) -> T:
-        """Utility to get the currently authenticated user."""
+        """Utility to get the currently authenticated user.
+
+        If AuthMiddleware is registered, reads directly from request.state (fast path).
+        Otherwise extracts and validates the Bearer token from the Authorization header.
+        """
+        user: T | None = getattr(request.state, "user", None)
+        if user:
+            return user
+
         token = await self.transport(request)
         if not token:
             await logger.error("Authentication failed", reason="Missing token")

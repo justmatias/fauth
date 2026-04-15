@@ -18,6 +18,7 @@ from .crypto import (
     hash_password,
     verify_password,
 )
+from .middleware import AuthMiddleware
 from .providers import AuthProvider, UserLoader
 from .transports import BearerTransport, Transport
 
@@ -25,6 +26,7 @@ __version__ = version("fauth")
 
 __all__ = [
     "AuthConfig",
+    "AuthMiddleware",
     "AuthProvider",
     "BearerTransport",
     "FAuthError",
