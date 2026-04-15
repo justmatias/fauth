@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 from pydantic import BaseModel, Field
 
 from fauth.core import AuthConfig
-from fauth.crypto import create_access_token, hash_password
+from fauth.crypto import create_access_token, create_refresh_token, hash_password
 from fauth.providers import AuthProvider
 from fauth.testing import FakeIdentityLoader, FakeUserLoader
 
@@ -112,6 +112,28 @@ def expired_token(auth_config: AuthConfig) -> str:
 def inactive_user_token(auth_config: AuthConfig, inactive_user: DummyUser) -> str:
     return create_access_token(sub=str(inactive_user.id_), config=auth_config)
 
+
+@pytest.fixture
+def refresh_token(auth_config: AuthConfig, user: DummyUser) -> str:
+    return create_refresh_token(sub=str(user.id_), config=auth_config)
+
+
+@pytest.fixture
+def expired_refresh_token(auth_config: AuthConfig) -> str:
+    expired_config = AuthConfig(
+        secret_key=auth_config.secret_key,
+        algorithm=auth_config.algorithm,
+        refresh_token_expire_minutes=0,
+    )
+    token = create_refresh_token(sub="any-user", config=expired_config)
+
+    time.sleep(1)
+    return token
+
+
+@pytest.fixture
+def inactive_user_refresh_token(auth_config: AuthConfig, inactive_user: DummyUser) -> str:
+    return create_refresh_token(sub=str(inactive_user.id_), config=auth_config)
 
 @pytest.fixture
 def _populate_user(user_loader: FakeUserLoader[DummyUser], user: DummyUser) -> None:
