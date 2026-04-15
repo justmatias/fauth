@@ -45,7 +45,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         self.auto_error = auto_error
         self.exclude_paths = set(exclude_paths or [])
 
-    async def dispatch(
+    async def dispatch(  # pylint: disalbe=too-complex, too-many-return-statements
         self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
         if request.url.path in self.exclude_paths:
