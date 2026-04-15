@@ -1,6 +1,85 @@
 # CHANGELOG
 
 
+## v0.3.0 (2026-04-15)
+
+### Bug Fixes
+
+- Correct typo in pylint disable directive within auth middleware
+  ([`bc06572`](https://github.com/justmatias/fauth/commit/bc0657237d634e604eaa6be046fbc68fa86a8396))
+
+### Chores
+
+- Disable pylint complexity checks for auth middleware dispatch method
+  ([`7c335aa`](https://github.com/justmatias/fauth/commit/7c335aa3165bd5de2234084b6df6a9361f815922))
+
+- **config**: Update pre-commit hooks
+  ([`34ca640`](https://github.com/justmatias/fauth/commit/34ca64099763b3d5faca1c1a2b56673584c4c321))
+
+- **config**: Update pre-commit hooks
+  ([`e6225f9`](https://github.com/justmatias/fauth/commit/e6225f946ef5a3f89c6a15cd490656bdb57f3425))
+
+- **deps**: Bump cryptography from 46.0.6 to 46.0.7
+  ([`c57f70f`](https://github.com/justmatias/fauth/commit/c57f70f21998cb49b83673cc7c47e8c3826dc65c))
+
+Bumps [cryptography](https://github.com/pyca/cryptography) from 46.0.6 to 46.0.7. -
+  [Changelog](https://github.com/pyca/cryptography/blob/main/CHANGELOG.rst) -
+  [Commits](https://github.com/pyca/cryptography/compare/46.0.6...46.0.7)
+
+--- updated-dependencies: - dependency-name: cryptography dependency-version: 46.0.7
+
+dependency-type: indirect ...
+
+Signed-off-by: dependabot[bot] <support@github.com>
+
+- **deps**: Bump pygments from 2.19.2 to 2.20.0
+  ([`c022333`](https://github.com/justmatias/fauth/commit/c022333b5f61003c07242810126fec443bd93a91))
+
+Bumps [pygments](https://github.com/pygments/pygments) from 2.19.2 to 2.20.0. - [Release
+  notes](https://github.com/pygments/pygments/releases) -
+  [Changelog](https://github.com/pygments/pygments/blob/master/CHANGES) -
+  [Commits](https://github.com/pygments/pygments/compare/2.19.2...2.20.0)
+
+--- updated-dependencies: - dependency-name: pygments dependency-version: 2.20.0
+
+dependency-type: indirect ...
+
+Signed-off-by: dependabot[bot] <support@github.com>
+
+- **deps**: Bump pyjwt from 2.11.0 to 2.12.0
+  ([`0c443a9`](https://github.com/justmatias/fauth/commit/0c443a92b921cea23f1ac71ba837fc335fed183f))
+
+Bumps [pyjwt](https://github.com/jpadilla/pyjwt) from 2.11.0 to 2.12.0. - [Release
+  notes](https://github.com/jpadilla/pyjwt/releases) -
+  [Changelog](https://github.com/jpadilla/pyjwt/blob/master/CHANGELOG.rst) -
+  [Commits](https://github.com/jpadilla/pyjwt/compare/2.11.0...2.12.0)
+
+--- updated-dependencies: - dependency-name: pyjwt dependency-version: 2.12.0
+
+dependency-type: indirect ...
+
+Signed-off-by: dependabot[bot] <support@github.com>
+
+- **deps-dev**: Bump pytest from 9.0.2 to 9.0.3
+  ([`f1372ad`](https://github.com/justmatias/fauth/commit/f1372addbf826fe305623d713cb492ee51e6ced8))
+
+Bumps [pytest](https://github.com/pytest-dev/pytest) from 9.0.2 to 9.0.3. - [Release
+  notes](https://github.com/pytest-dev/pytest/releases) -
+  [Changelog](https://github.com/pytest-dev/pytest/blob/main/CHANGELOG.rst) -
+  [Commits](https://github.com/pytest-dev/pytest/compare/9.0.2...9.0.3)
+
+--- updated-dependencies: - dependency-name: pytest dependency-version: 9.0.3
+
+dependency-type: direct:development ...
+
+Signed-off-by: dependabot[bot] <support@github.com>
+
+### Features
+
+- Implement AuthMiddleware for JWT-based request authentication and user loading
+  ([`0527038`](https://github.com/justmatias/fauth/commit/0527038d3f5e897fc77258820a26c062d3fc075e))
+
+
 ## v0.2.2 (2026-04-04)
 
 ### Bug Fixes
