@@ -168,3 +168,64 @@ async def test_authenticate_no_loader_raises_error(
     provider = AuthProvider(config=auth_config, user_loader=user_loader)
     with pytest.raises(RuntimeError, match="IdentityLoader must be provided"):
         await provider.authenticate("alice", "password")
+
+
+@pytest.mark.asyncio
+@pytest.mark.usefixtures("_populate_user")
+async def test_refresh_success(
+    provider: AuthProvider[DummyUser], refresh_token: str
+) -> None:
+    result = await provider.refresh(refresh_token)
+    assert result.access_token
+    assert result.refresh_token
+    assert result.token_type == "bearer"
+
+
+@pytest.mark.asyncio
+async def test_refresh_invalid_token_type(
+    provider: AuthProvider[DummyUser], user_token: str
+) -> None:
+    # user_token is an access token, not a refresh token
+    with pytest.raises(HTTPException) as excinfo:
+        await provider.refresh(user_token)
+    assert excinfo.value.status_code == status.HTTP_401_UNAUTHORIZED
+    assert excinfo.value.detail == "Invalid token type"
+
+
+@pytest.mark.asyncio
+async def test_refresh_unknown_user(
+    provider: AuthProvider[DummyUser], refresh_token: str
+) -> None:
+    with pytest.raises(HTTPException) as excinfo:
+        await provider.refresh(refresh_token)
+    assert excinfo.value.status_code == status.HTTP_401_UNAUTHORIZED
+    assert excinfo.value.detail == "User does not exist"
+
+
+@pytest.mark.asyncio
+@pytest.mark.usefixtures("_populate_inactive_user")
+async def test_refresh_inactive_user(
+    provider: AuthProvider[DummyUser], inactive_user_refresh_token: str
+) -> None:
+    with pytest.raises(HTTPException) as excinfo:
+        await provider.refresh(inactive_user_refresh_token)
+    assert excinfo.value.status_code == status.HTTP_401_UNAUTHORIZED
+    assert excinfo.value.detail == "Inactive user"
+
+
+@pytest.mark.asyncio
+async def test_refresh_expired_token(
+    provider: AuthProvider[DummyUser], expired_refresh_token: str
+) -> None:
+    with pytest.raises(HTTPException) as excinfo:
+        await provider.refresh(expired_refresh_token)
+    assert excinfo.value.status_code == status.HTTP_401_UNAUTHORIZED
+    assert excinfo.value.detail == "Token expired"
+
+
+@pytest.mark.asyncio
+async def test_refresh_invalid_token(provider: AuthProvider[DummyUser]) -> None:
+    with pytest.raises(HTTPException) as excinfo:
+        await provider.refresh("invalid.token.str")
+    assert excinfo.value.status_code == status.HTTP_401_UNAUTHORIZED
+    assert excinfo.value.detail == "Invalid token"

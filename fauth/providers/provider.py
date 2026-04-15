@@ -211,6 +211,48 @@ class AuthProvider(Generic[T]):
             token_type=self.config.token_type,
         )
 
+    async def refresh(self, refresh_token: str) -> TokenResponse:
+        """Validates a refresh token and generates new access and refresh tokens."""
+        await logger.info("Refreshing user token...")
+        try:
+            payload = decode_token(
+                refresh_token, self.config, self.token_payload_schema
+            )
+            if payload.token_type != "refresh":
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid token type",
+                )
+
+            user = await self.user_loader(payload)
+            if not user:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="User does not exist",
+                )
+
+            if hasattr(user, "is_active") and not user.is_active:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Inactive user",
+                )
+
+            token_response = await self.login(sub=payload.sub)
+            await logger.info("Token refreshed", sub=payload.sub)
+            return token_response
+        except TokenExpiredError as e:
+            await logger.warning("Token refresh failed", reason="Token expired")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token expired",
+            ) from e
+        except InvalidTokenError as e:
+            await logger.warning("Token refresh failed", reason="Invalid token")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token",
+            ) from e
+
     def get_security_scheme(self) -> SecurityBase:
         """Returns the security scheme for FastAPI OpenAPI documentation."""
         return self.transport.get_security_scheme()
