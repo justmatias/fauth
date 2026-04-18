@@ -5,11 +5,15 @@ repos:
       - id: validate-pyproject
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v6.0.0
+    rev: v5.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: detect-private-key
+      - id: check-yaml
+      - id: pretty-format-json
+        args: ['--autofix']
+      - id: check-merge-conflict
 
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.30.0
@@ -22,6 +26,7 @@ repos:
       - id: ruff-check
         name: ruff
         args: ['--fix']
+      - id: ruff-format
 
   - repo: https://github.com/PyCQA/bandit
     rev: 1.9.4
@@ -56,3 +61,9 @@ repos:
           - fastapi==0.135.1
           - pyjwt==2.11.0
           - pwdlib==0.3.0
+
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.14.0
+    hooks:
+      - id: hadolint
+        args: ['--ignore', 'DL3008,DL3015,DL3002']

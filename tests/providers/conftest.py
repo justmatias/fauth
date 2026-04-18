@@ -132,8 +132,11 @@ def expired_refresh_token(auth_config: AuthConfig) -> str:
 
 
 @pytest.fixture
-def inactive_user_refresh_token(auth_config: AuthConfig, inactive_user: DummyUser) -> str:
+def inactive_user_refresh_token(
+    auth_config: AuthConfig, inactive_user: DummyUser
+) -> str:
     return create_refresh_token(sub=str(inactive_user.id_), config=auth_config)
+
 
 @pytest.fixture
 def _populate_user(user_loader: FakeUserLoader[DummyUser], user: DummyUser) -> None:
