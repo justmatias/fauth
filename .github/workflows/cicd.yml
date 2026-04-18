@@ -75,14 +75,12 @@ jobs:
         run: uv run pre-commit autoupdate
 
       - name: Commit updated hooks
-        env:
-          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add .pre-commit-config.yaml
           git diff --staged --quiet || git commit -m "chore(config): update pre-commit hooks"
-          git push origin HEAD:"$BRANCH_NAME"
+          git push origin "HEAD:${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}"
 
   versioning:
     name: Versioning
