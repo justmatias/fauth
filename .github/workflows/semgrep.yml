@@ -26,4 +26,4 @@ jobs:
           semgrep \
             --config auto \
             --error \
-            --metrics=off
+            --metrics=auto
