@@ -1,6 +1,15 @@
 # CHANGELOG
 
 
+## v0.4.2 (2026-04-18)
+
+### Bug Fixes
+
+- Update require_roles to support singular role fields and enum types with regression tests
+  ([#39](https://github.com/justmatias/fauth/pull/39),
+  [`0d2c646`](https://github.com/justmatias/fauth/commit/0d2c646729fcfffe9e10b047e117636b97530620))
+
+
 ## v0.4.1 (2026-04-18)
 
 ### Bug Fixes
