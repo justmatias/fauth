@@ -1,6 +1,65 @@
 # CHANGELOG
 
 
+## v0.4.1 (2026-04-18)
+
+### Bug Fixes
+
+- **ci**: Prevent shell injection in GitHub Actions workflow
+  ([#37](https://github.com/justmatias/fauth/pull/37),
+  [`11835f1`](https://github.com/justmatias/fauth/commit/11835f16cedd3f064c9ffe2df26f02a53f9b81f9))
+
+Fix potential shell injection vulnerability in CI/CD workflow by avoiding GitHub expression
+  interpolation.
+
+## Changes - Removed `env:` block that used `${{ github.head_ref || github.ref_name }}`
+  interpolation - Changed git push command to use GitHub's built-in environment variables
+  (`GITHUB_HEAD_REF` and `GITHUB_REF_NAME`) directly in the shell - Properly quoted the variable to
+  prevent word splitting
+
+## Why Using `${{ }}` expression interpolation with `github.head_ref` in a workflow step can be
+  exploited by attackers who create pull requests with maliciously crafted branch names. By using
+  the shell environment variables `GITHUB_HEAD_REF` and `GITHUB_REF_NAME` (which GitHub Actions
+  automatically provides), we avoid the expression interpolation while maintaining the same
+  functionality. The shell handles these variables safely when properly quoted.
+
+## Semgrep Finding Details Using variable interpolation `${{...}}` with `github` context data in a
+  `run:` step could allow an attacker to inject their own code into the runner. This would allow
+  them to steal secrets and code. `github` context data can have arbitrary user input and should be
+  treated as untrusted. Instead, use an intermediate environment variable with `env:` to store the
+  data and use the environment variable in the `run:` script. Be sure to use double-quotes the
+  environment variable, like this: "$ENVVAR".
+
+Semgrep Assistant generated this pull request to fix [a
+  finding](https://semgrep.dev/orgs/justmatias/findings/756619268) from the detection rule
+  [yaml.github-actions.security.run-shell-injection.run-shell-injection](https://semgrep.dev/r/yaml.github-actions.security.run-shell-injection.run-shell-injection).
+
+Co-authored-by: Semgrep Autofix <autofix@semgrep.com>
+
+### Chores
+
+- Add Snyk and Semgrep security scanning workflows
+  ([#35](https://github.com/justmatias/fauth/pull/35),
+  [`768b38b`](https://github.com/justmatias/fauth/commit/768b38b2880b9a52cb8a7d8d3a5c6200dc456db9))
+
+* ci: add Snyk and Semgrep security scanning workflows
+
+* chore(config): update pre-commit hooks
+
+* chore: update autotrigger
+
+* chore: change semgrep metrics option from off to auto
+
+* ci: fix shell injection vulnerability in cicd workflow
+
+---------
+
+Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+
+- Remove pre-commit autoupdate workflow ([#36](https://github.com/justmatias/fauth/pull/36),
+  [`7022909`](https://github.com/justmatias/fauth/commit/7022909b390658add76bb9bf767b0fdf9fcf4657))
+
+
 ## v0.4.0 (2026-04-15)
 
 ### Chores
