@@ -1,3 +1,4 @@
+import enum
 import time
 from typing import Any
 from uuid import UUID, uuid4
@@ -13,12 +14,36 @@ from fauth.providers import AuthProvider
 from fauth.testing import FakeIdentityLoader, FakeUserLoader
 
 
+class Role(enum.Enum):
+    ADMIN = "admin"
+    USER = "user"
+
+
 class DummyUser(BaseModel):
     id_: UUID = Field(default_factory=uuid4)
     hashed_password: str = Field(default=hash_password("secret_password"))
     is_active: bool = Field(default=True)
     roles: list[str] = Field(default_factory=list)
     permissions: list[str] = Field(default_factory=list)
+
+
+class StringRoleUser(BaseModel):
+    id_: UUID = Field(default_factory=uuid4)
+    is_active: bool = Field(default=True)
+    role: str = "admin"
+
+
+class EnumRoleUser(BaseModel):
+    id_: UUID = Field(default_factory=uuid4)
+    is_active: bool = Field(default=True)
+    role: Role = Role.ADMIN
+
+
+class CombinedRolesUser(BaseModel):
+    id_: UUID = Field(default_factory=uuid4)
+    is_active: bool = Field(default=True)
+    roles: list[str] = Field(default_factory=lambda: ["user"])
+    role: str = "admin"
 
 
 @pytest.fixture
@@ -29,6 +54,21 @@ def user() -> DummyUser:
 @pytest.fixture
 def inactive_user() -> DummyUser:
     return DummyUser(is_active=False)
+
+
+@pytest.fixture
+def string_role_user() -> StringRoleUser:
+    return StringRoleUser()
+
+
+@pytest.fixture
+def enum_role_user() -> EnumRoleUser:
+    return EnumRoleUser()
+
+
+@pytest.fixture
+def combined_roles_user() -> CombinedRolesUser:
+    return CombinedRolesUser()
 
 
 @pytest.fixture
@@ -196,6 +236,25 @@ def _populate_identity_inactive_user(
     identity_loader: FakeIdentityLoader[DummyUser], inactive_user: DummyUser
 ) -> None:
     identity_loader.add_user("alice", inactive_user)
+
+
+@pytest.fixture
+def user_with_singular_role() -> DummyUser:
+    return DummyUser(roles=["admin"])
+
+
+@pytest.fixture
+def _populate_user_with_singular_role(
+    user_loader: FakeUserLoader[DummyUser], user_with_singular_role: DummyUser
+) -> None:
+    user_loader.add_user(str(user_with_singular_role.id_), user_with_singular_role)
+
+
+@pytest.fixture
+def user_with_singular_role_token(
+    auth_config: AuthConfig, user_with_singular_role: DummyUser
+) -> str:
+    return create_access_token(sub=str(user_with_singular_role.id_), config=auth_config)
 
 
 @pytest.fixture
