@@ -1,3 +1,4 @@
+import enum
 from collections.abc import Callable
 from typing import Annotated, Any, Generic, TypeVar
 
@@ -111,16 +112,21 @@ class AuthProvider(Generic[T]):
             )
         return user
 
-    def require_roles(self, roles: list[str]) -> Callable:
+    def require_roles(self, required_roles: list[str | enum.Enum]) -> Callable:
         """Dependency demanding the current user has all specified roles."""
 
         async def role_checker(
             user: Annotated[T, Depends(self.require_active_user)],
         ) -> T:
-            user_roles = getattr(user, "roles", [])
-            required_roles = set(roles)
-            for role in required_roles:
-                if role not in user_roles:
+            roles = list(getattr(user, "roles", []))
+            role = getattr(user, "role", None)
+
+            if role is not None:
+                roles.append(role)
+
+            required_roles_set = set(required_roles)
+            for role in required_roles_set:
+                if role not in roles:
                     await logger.error(
                         "Authorization failed",
                         reason="Missing role",

@@ -8,7 +8,14 @@ from fauth.crypto import hash_password
 from fauth.providers import AuthProvider
 from fauth.testing import FakeIdentityLoader
 
-from .conftest import DummyUser, FakeUserLoader
+from .conftest import (
+    CombinedRolesUser,
+    DummyUser,
+    EnumRoleUser,
+    FakeUserLoader,
+    Role,
+    StringRoleUser,
+)
 
 
 def test_require_user_expired_token(client: TestClient, expired_token: str) -> None:
@@ -57,6 +64,50 @@ def test_require_active_user_denied(
 def test_require_roles_granted(client: TestClient, user_token: str) -> None:
     response = client.get("/admin", headers={"Authorization": f"Bearer {user_token}"})
     assert response.status_code == 200
+
+
+@pytest.mark.usefixtures("_populate_user_with_singular_role")
+@pytest.mark.regression
+def test_require_roles_with_singular_role_fallback(
+    client: TestClient, user_with_singular_role_token: str
+) -> None:
+    response = client.get(
+        "/admin", headers={"Authorization": f"Bearer {user_with_singular_role_token}"}
+    )
+    assert response.status_code == 200
+
+
+@pytest.mark.asyncio
+@pytest.mark.regression
+async def test_require_roles_with_string_role_fallback(
+    provider: AuthProvider[DummyUser],
+    string_role_user: StringRoleUser,
+) -> None:
+    role_checker = provider.require_roles(["admin"])
+    result = await role_checker(string_role_user)
+    assert result.id_ == string_role_user.id_
+
+
+@pytest.mark.asyncio
+@pytest.mark.regression
+async def test_require_roles_combined_roles_and_role(
+    provider: AuthProvider[DummyUser],
+    combined_roles_user: CombinedRolesUser,
+) -> None:
+    role_checker = provider.require_roles(["admin"])
+    result = await role_checker(combined_roles_user)
+    assert result.id_ == combined_roles_user.id_
+
+
+@pytest.mark.asyncio
+@pytest.mark.regression
+async def test_require_roles_with_enum_role_fallback(
+    provider: AuthProvider[DummyUser],
+    enum_role_user: EnumRoleUser,
+) -> None:
+    role_checker = provider.require_roles([Role.ADMIN])
+    result = await role_checker(enum_role_user)
+    assert result.id_ == enum_role_user.id_
 
 
 @pytest.mark.usefixtures("_populate_no_roles_user")
