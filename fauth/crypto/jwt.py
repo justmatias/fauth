@@ -32,32 +32,51 @@ def create_token(  # pylint: disable=too-many-arguments, too-many-positional-arg
 
 
 def create_access_token(
+    *,
     sub: str,
-    config: AuthConfig,
+    auth_config: AuthConfig,
     scopes: list[str] | None = None,
     extra: dict[str, Any] | None = None,
 ) -> str:
     return create_token(
         sub=sub,
         token_type="access",
-        expire_minutes=config.access_token_expire_minutes,
-        config=config,
+        expire_minutes=auth_config.access_token_expire_minutes,
+        config=auth_config,
         scopes=scopes,
         extra=extra,
     )
 
 
 def create_refresh_token(
+    *,
     sub: str,
-    config: AuthConfig,
+    auth_config: AuthConfig,
     scopes: list[str] | None = None,
     extra: dict[str, Any] | None = None,
 ) -> str:
     return create_token(
         sub=sub,
         token_type="refresh",
-        expire_minutes=config.refresh_token_expire_minutes,
-        config=config,
+        expire_minutes=auth_config.refresh_token_expire_minutes,
+        config=auth_config,
+        scopes=scopes,
+        extra=extra,
+    )
+
+
+def create_password_reset_token(
+    *,
+    sub: str,
+    auth_config: AuthConfig,
+    scopes: list[str] | None = None,
+    extra: dict[str, Any] | None = None,
+) -> str:
+    return create_token(
+        sub=sub,
+        token_type="password_reset",
+        expire_minutes=auth_config.password_reset_token_expire_minutes,
+        config=auth_config,
         scopes=scopes,
         extra=extra,
     )
@@ -65,17 +84,24 @@ def create_refresh_token(
 
 def decode_token(
     token: str,
-    config: AuthConfig,
+    *,
+    auth_config: AuthConfig,
     token_payload_schema: type[TokenPayload] = TokenPayload,
+    expected_type: str | None = None,
 ) -> TokenPayload:
     try:
         decoded = pyjwt.decode(
             token,
-            config.secret_key,
-            algorithms=[config.algorithm],
+            auth_config.secret_key,
+            algorithms=[auth_config.algorithm],
         )
-        return token_payload_schema(**decoded)
+        payload = token_payload_schema(**decoded)
+        if expected_type and payload.token_type != expected_type:
+            raise InvalidTokenError(
+                f"Expected {expected_type} got {payload.token_type}"
+            )
+        return payload
     except pyjwt.ExpiredSignatureError as e:
         raise TokenExpiredError("Token has expired") from e
     except pyjwt.InvalidTokenError as e:
-        raise InvalidTokenError("Invalid token") from e
+        raise InvalidTokenError("Failure when decoding token") from e

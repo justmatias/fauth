@@ -137,7 +137,7 @@ def client(app: FastAPI) -> TestClient:
 
 @pytest.fixture
 def user_token(auth_config: AuthConfig, user: DummyUser) -> str:
-    return create_access_token(sub=str(user.id_), config=auth_config)
+    return create_access_token(sub=str(user.id_), auth_config=auth_config)
 
 
 @pytest.fixture
@@ -147,7 +147,7 @@ def expired_token(auth_config: AuthConfig) -> str:
         algorithm=auth_config.algorithm,
         access_token_expire_minutes=0,
     )
-    token = create_access_token(sub="any-user", config=expired_config)
+    token = create_access_token(sub="any-user", auth_config=expired_config)
     time.sleep(1)
     return token
 

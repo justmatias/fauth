@@ -132,7 +132,7 @@ def client(fastapi_app: FastAPI) -> TestClient:
 
 @pytest.fixture
 def user_token(auth_config: AuthConfig, user: DummyUser) -> str:
-    return create_access_token(sub=str(user.id_), config=auth_config)
+    return create_access_token(sub=str(user.id_), auth_config=auth_config)
 
 
 @pytest.fixture
@@ -142,7 +142,7 @@ def expired_token(auth_config: AuthConfig) -> str:
         algorithm=auth_config.algorithm,
         access_token_expire_minutes=0,
     )
-    token = create_access_token(sub="any-user", config=expired_config)
+    token = create_access_token(sub="any-user", auth_config=expired_config)
 
     time.sleep(1)
     return token
@@ -150,12 +150,12 @@ def expired_token(auth_config: AuthConfig) -> str:
 
 @pytest.fixture
 def inactive_user_token(auth_config: AuthConfig, inactive_user: DummyUser) -> str:
-    return create_access_token(sub=str(inactive_user.id_), config=auth_config)
+    return create_access_token(sub=str(inactive_user.id_), auth_config=auth_config)
 
 
 @pytest.fixture
 def refresh_token(auth_config: AuthConfig, user: DummyUser) -> str:
-    return create_refresh_token(sub=str(user.id_), config=auth_config)
+    return create_refresh_token(sub=str(user.id_), auth_config=auth_config)
 
 
 @pytest.fixture
@@ -165,7 +165,7 @@ def expired_refresh_token(auth_config: AuthConfig) -> str:
         algorithm=auth_config.algorithm,
         refresh_token_expire_minutes=0,
     )
-    token = create_refresh_token(sub="any-user", config=expired_config)
+    token = create_refresh_token(sub="any-user", auth_config=expired_config)
 
     time.sleep(1)
     return token
@@ -175,7 +175,7 @@ def expired_refresh_token(auth_config: AuthConfig) -> str:
 def inactive_user_refresh_token(
     auth_config: AuthConfig, inactive_user: DummyUser
 ) -> str:
-    return create_refresh_token(sub=str(inactive_user.id_), config=auth_config)
+    return create_refresh_token(sub=str(inactive_user.id_), auth_config=auth_config)
 
 
 @pytest.fixture
@@ -209,7 +209,7 @@ def _populate_no_roles_user(
 
 @pytest.fixture
 def no_roles_user_token(auth_config: AuthConfig, no_roles_user: DummyUser) -> str:
-    return create_access_token(sub=str(no_roles_user.id_), config=auth_config)
+    return create_access_token(sub=str(no_roles_user.id_), auth_config=auth_config)
 
 
 @pytest.fixture
@@ -221,7 +221,7 @@ def _populate_no_perms_user(
 
 @pytest.fixture
 def no_perms_user_token(auth_config: AuthConfig, no_perms_user: DummyUser) -> str:
-    return create_access_token(sub=str(no_perms_user.id_), config=auth_config)
+    return create_access_token(sub=str(no_perms_user.id_), auth_config=auth_config)
 
 
 @pytest.fixture
@@ -254,7 +254,9 @@ def _populate_user_with_singular_role(
 def user_with_singular_role_token(
     auth_config: AuthConfig, user_with_singular_role: DummyUser
 ) -> str:
-    return create_access_token(sub=str(user_with_singular_role.id_), config=auth_config)
+    return create_access_token(
+        sub=str(user_with_singular_role.id_), auth_config=auth_config
+    )
 
 
 @pytest.fixture

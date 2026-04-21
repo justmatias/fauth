@@ -16,7 +16,7 @@ def test_malformed_token_returns_401(client: TestClient) -> None:
         "/protected", headers={"Authorization": "Bearer not-a-valid-jwt"}
     )
     assert response.status_code == 401
-    assert response.json()["detail"] == "Invalid token"
+    assert response.json()["detail"] == "Invalid token: Failure when decoding token"
 
 
 def test_expired_token_returns_401(client: TestClient, expired_token: str) -> None:

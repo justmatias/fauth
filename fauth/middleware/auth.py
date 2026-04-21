@@ -61,16 +61,20 @@ class AuthMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
 
         try:
-            payload = decode_token(token, self.config, self.token_payload_schema)
+            payload = decode_token(
+                token,
+                token_payload_schema=self.token_payload_schema,
+                auth_config=self.config,
+            )
         except TokenExpiredError:
             if self.auto_error:
                 await logger.warning("Authentication failed", reason="Token expired")
                 return JSONResponse({"detail": "Token expired"}, status_code=401)
             return await call_next(request)  # pragma: no cover
-        except InvalidTokenError:
+        except InvalidTokenError as e:
             if self.auto_error:
-                await logger.warning("Authentication failed", reason="Invalid token")
-                return JSONResponse({"detail": "Invalid token"}, status_code=401)
+                await logger.warning("Authentication failed", reason=e.message)
+                return JSONResponse({"detail": e.message}, status_code=401)
             return await call_next(request)
 
         user = await self.user_loader(payload)

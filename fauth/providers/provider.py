@@ -70,7 +70,11 @@ class AuthProvider(Generic[T]):
             )
 
         try:
-            payload = decode_token(token, self.config, self.token_payload_schema)
+            payload = decode_token(
+                token,
+                auth_config=self.config,
+                token_payload_schema=self.token_payload_schema,
+            )
         except TokenExpiredError as e:
             await logger.warning("Authentication failed", reason="Token expired")
             raise HTTPException(
@@ -78,10 +82,10 @@ class AuthProvider(Generic[T]):
                 detail="Token expired",
             ) from e
         except InvalidTokenError as e:
-            await logger.warning("Authentication failed", reason="Invalid token")
+            await logger.warning("Authentication failed", reason=e.message)
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid token",
+                detail=e.message,
             ) from e
 
         await logger.debug(
@@ -201,13 +205,13 @@ class AuthProvider(Generic[T]):
         await logger.info("Login token issued", sub=sub)
         access_token = create_access_token(
             sub=sub,
-            config=self.config,
+            auth_config=self.config,
             scopes=scopes,
             extra=extra,
         )
         refresh_token = create_refresh_token(
             sub=sub,
-            config=self.config,
+            auth_config=self.config,
             scopes=scopes,
             extra=extra,
         )
@@ -222,13 +226,11 @@ class AuthProvider(Generic[T]):
         await logger.info("Refreshing user token...")
         try:
             payload = decode_token(
-                refresh_token, self.config, self.token_payload_schema
+                refresh_token,
+                auth_config=self.config,
+                token_payload_schema=self.token_payload_schema,
+                expected_type="refresh",
             )
-            if payload.token_type != "refresh":
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Invalid token type",
-                )
 
             user = await self.user_loader(payload)
             if not user:
@@ -253,10 +255,10 @@ class AuthProvider(Generic[T]):
                 detail="Token expired",
             ) from e
         except InvalidTokenError as e:
-            await logger.warning("Token refresh failed", reason="Invalid token")
+            await logger.warning("Token refresh failed", reason=e.message)
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid token",
+                detail=e.message,
             ) from e
 
     def get_security_scheme(self) -> SecurityBase:
