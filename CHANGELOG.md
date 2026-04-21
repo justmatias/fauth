@@ -1,6 +1,15 @@
 # CHANGELOG
 
 
+## v0.5.0 (2026-04-21)
+
+### Features
+
+- Add password reset token support and improve JWT validation with type enforcement
+  ([#40](https://github.com/justmatias/fauth/pull/40),
+  [`b688ea1`](https://github.com/justmatias/fauth/commit/b688ea1ff2eab66183665048fb2c42256cd793c7))
+
+
 ## v0.4.2 (2026-04-18)
 
 ### Bug Fixes
