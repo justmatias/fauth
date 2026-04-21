@@ -61,7 +61,7 @@ def client(app: FastAPI) -> TestClient:
 
 @pytest.fixture
 def user_access_token(auth_config: AuthConfig, user: DummyUser) -> str:
-    return create_access_token(sub=str(user.id_), config=auth_config)
+    return create_access_token(sub=str(user.id_), auth_config=auth_config)
 
 
 @pytest.fixture
@@ -82,4 +82,4 @@ def _populate_inactive_dummy_user(
 def inactive_user_access_token(
     auth_config: AuthConfig, inactive_user: DummyUser
 ) -> str:
-    return create_access_token(sub=str(inactive_user.id_), config=auth_config)
+    return create_access_token(sub=str(inactive_user.id_), auth_config=auth_config)

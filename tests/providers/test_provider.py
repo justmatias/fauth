@@ -27,7 +27,7 @@ def test_require_user_expired_token(client: TestClient, expired_token: str) -> N
 def test_require_user_invalid_token(client: TestClient) -> None:
     response = client.get("/user", headers={"Authorization": "Bearer not.a.real.jwt"})
     assert response.status_code == 401
-    assert response.json()["detail"] == "Invalid token"
+    assert response.json()["detail"] == "Invalid token: Failure when decoding token"
 
 
 @pytest.mark.usefixtures("_populate_user")
@@ -240,7 +240,7 @@ async def test_refresh_invalid_token_type(
     with pytest.raises(HTTPException) as excinfo:
         await provider.refresh(user_token)
     assert excinfo.value.status_code == status.HTTP_401_UNAUTHORIZED
-    assert excinfo.value.detail == "Invalid token type"
+    assert excinfo.value.detail == "Invalid token: Expected refresh got access"
 
 
 @pytest.mark.asyncio
@@ -279,4 +279,4 @@ async def test_refresh_invalid_token(provider: AuthProvider[DummyUser]) -> None:
     with pytest.raises(HTTPException) as excinfo:
         await provider.refresh("invalid.token.str")
     assert excinfo.value.status_code == status.HTTP_401_UNAUTHORIZED
-    assert excinfo.value.detail == "Invalid token"
+    assert excinfo.value.detail == "Invalid token: Failure when decoding token"
