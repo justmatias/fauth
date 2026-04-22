@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.5.3 (2026-04-22)
+
+### Bug Fixes
+
+- **docs**: Update docs based on latest updates
+  ([`90fd43f`](https://github.com/justmatias/fauth/commit/90fd43f0ffef6ddb0f296ba13936a84acda89149))
+
+
 ## v0.5.2 (2026-04-22)
 
 ### Bug Fixes
