@@ -69,24 +69,7 @@ class AuthProvider(Generic[T]):
                 detail="Not authenticated",
             )
 
-        try:
-            payload = decode_token(
-                token,
-                auth_config=self.config,
-                token_payload_schema=self.token_payload_schema,
-            )
-        except TokenExpiredError as e:
-            await logger.warning("Authentication failed", reason="Token expired")
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token expired",
-            ) from e
-        except InvalidTokenError as e:
-            await logger.warning("Authentication failed", reason=e.message)
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=e.message,
-            ) from e
+        payload = await self.verify_token(token)
 
         await logger.debug(
             "Token decoded", sub=payload.sub, token_type=payload.token_type
@@ -221,45 +204,51 @@ class AuthProvider(Generic[T]):
             token_type=self.config.token_type,
         )
 
-    async def refresh(self, refresh_token: str) -> TokenResponse:
-        """Validates a refresh token and generates new access and refresh tokens."""
-        await logger.info("Refreshing user token...")
+    async def verify_token(
+        self, token: str, expected_type: str | None = None
+    ) -> TokenPayload:
+        """Validates a JWT and handles converting potential exceptions into HTTPExceptions."""
         try:
-            payload = decode_token(
-                refresh_token,
+            return decode_token(
+                token,
                 auth_config=self.config,
                 token_payload_schema=self.token_payload_schema,
-                expected_type="refresh",
+                expected_type=expected_type,
             )
-
-            user = await self.user_loader(payload)
-            if not user:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="User does not exist",
-                )
-
-            if hasattr(user, "is_active") and not user.is_active:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Inactive user",
-                )
-
-            token_response = await self.login(sub=payload.sub)
-            await logger.info("Token refreshed", sub=payload.sub)
-            return token_response
         except TokenExpiredError as e:
-            await logger.warning("Token refresh failed", reason="Token expired")
+            await logger.warning("Token validation failed", reason="Token expired")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Token expired",
             ) from e
         except InvalidTokenError as e:
-            await logger.warning("Token refresh failed", reason=e.message)
+            await logger.warning("Token validation failed", reason=e.message)
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail=e.message,
             ) from e
+
+    async def refresh(self, refresh_token: str) -> TokenResponse:
+        """Validates a refresh token and generates new access and refresh tokens."""
+        await logger.info("Refreshing user token...")
+        payload = await self.verify_token(refresh_token, expected_type="refresh")
+
+        user = await self.user_loader(payload)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User does not exist",
+            )
+
+        if hasattr(user, "is_active") and not user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Inactive user",
+            )
+
+        token_response = await self.login(sub=payload.sub)
+        await logger.info("Token refreshed", sub=payload.sub)
+        return token_response
 
     def get_security_scheme(self) -> SecurityBase:
         """Returns the security scheme for FastAPI OpenAPI documentation."""
