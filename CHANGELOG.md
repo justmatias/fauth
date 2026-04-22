@@ -1,6 +1,15 @@
 # CHANGELOG
 
 
+## v0.5.2 (2026-04-22)
+
+### Bug Fixes
+
+- Export create_password_reset_token in package init
+  ([#42](https://github.com/justmatias/fauth/pull/42),
+  [`ee20e8a`](https://github.com/justmatias/fauth/commit/ee20e8a1fdd708bd59b0ff1ace2d36a84c2324f5))
+
+
 ## v0.5.1 (2026-04-22)
 
 ### Bug Fixes

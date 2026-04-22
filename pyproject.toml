@@ -1,6 +1,6 @@
 [project]
 name = "fauth"
-version = "0.5.1"
+version = "0.5.2"
 description = "Ergonomic, lightweight JWT authentication for FastAPI. Secure your routes instantly with plug-and-play dependency injection"
 readme = "README.md"
 requires-python = ">=3.12"
