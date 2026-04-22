@@ -1,6 +1,15 @@
 # CHANGELOG
 
 
+## v0.5.1 (2026-04-22)
+
+### Bug Fixes
+
+- Abstract token verification into a reusable method
+  ([#41](https://github.com/justmatias/fauth/pull/41),
+  [`b9850d8`](https://github.com/justmatias/fauth/commit/b9850d84d8f17ef8cc3af33287077436808fc187))
+
+
 ## v0.5.0 (2026-04-21)
 
 ### Features
