@@ -205,13 +205,15 @@ app.include_router(secure_router)
 
 Centralized authentication settings, powered by [`pydantic-settings`](https://docs.pydantic.dev/latest/concepts/pydantic_settings/). Supports loading values from environment variables out of the box.
 
-| Parameter                      | Type                | Default          | Description                      |
-| ------------------------------ | ------------------- | ---------------- | -------------------------------- |
-| `secret_key`                   | `str`               | _required_       | Secret key used for signing JWTs |
-| `algorithm`                    | `str`               | `"HS256"`        | JWT signing algorithm            |
-| `access_token_expire_minutes`  | `int`               | `15`             | Access token TTL in minutes      |
-| `refresh_token_expire_minutes` | `int`               | `10080` (7 days) | Refresh token TTL in minutes     |
-| `token_type`                   | `Literal["bearer"]` | `"bearer"`       | Token type for responses         |
+| Parameter                                 | Type                | Default           | Description                              |
+| ----------------------------------------- | ------------------- | ----------------- | ---------------------------------------- |
+| `secret_key`                              | `str`               | _required_        | Secret key used for signing JWTs         |
+| `algorithm`                               | `str`               | `"HS256"`         | JWT signing algorithm                    |
+| `access_token_expire_minutes`             | `int`               | `15`              | Access token TTL in minutes              |
+| `refresh_token_expire_minutes`            | `int`               | `10080` (7 days)  | Refresh token TTL in minutes             |
+| `password_reset_token_expire_minutes`     | `int`               | `15`              | Password reset token TTL in minutes      |
+| `email_verification_token_expire_minutes` | `int`               | `1440` (1 day)    | Email verification token TTL in minutes  |
+| `token_type`                              | `Literal["bearer"]` | `"bearer"`        | Token type for responses                 |
 
 ```python
 from fauth import AuthConfig
@@ -310,14 +312,14 @@ class MyIdentityLoader:
 
 The decoded JWT structure. Accepts extra claims via `model_config = ConfigDict(extra="allow")`.
 
-| Field        | Type                           | Description                              |
-| ------------ | ------------------------------ | ---------------------------------------- |
-| `sub`        | `str`                          | Subject (typically user ID)              |
-| `exp`        | `int`                          | Expiry timestamp                         |
-| `iat`        | `int`                          | Issued-at timestamp                      |
-| `jti`        | `str`                          | Unique token ID                          |
-| `scopes`     | `list[str]`                    | Token scopes (defaults to `[]`)          |
-| `token_type` | `Literal["access", "refresh"]` | Distinguishes access from refresh tokens |
+| Field        | Type                                                                   | Description                              |
+| ------------ | ---------------------------------------------------------------------- | ---------------------------------------- |
+| `sub`        | `str`                                                                  | Subject (typically user ID)              |
+| `exp`        | `int`                                                                  | Expiry timestamp                         |
+| `iat`        | `int`                                                                  | Issued-at timestamp                      |
+| `jti`        | `str`                                                                  | Unique token ID                          |
+| `scopes`     | `list[str]`                                                            | Token scopes (defaults to `[]`)          |
+| `token_type` | `Literal["access", "refresh", "password_reset", "email_verification"]` | Distinguishes between token types        |
 
 ### `TokenResponse`
 
@@ -340,24 +342,33 @@ FAuth exposes standalone functions for direct use outside the `AuthProvider`:
 ### JWT
 
 ```python
-from fauth import create_access_token, create_refresh_token, decode_token, AuthConfig
+from fauth import (
+    create_access_token,
+    create_refresh_token,
+    create_password_reset_token,
+    create_email_verification_token,
+    decode_token,
+    AuthConfig
+)
 
 config = AuthConfig(secret_key="my-secret")
 
 # Create tokens
-access = create_access_token(sub="user-123", config=config)
-refresh = create_refresh_token(sub="user-123", config=config)
+access = create_access_token(sub="user-123", auth_config=config)
+refresh = create_refresh_token(sub="user-123", auth_config=config)
+reset = create_password_reset_token(sub="user-123", auth_config=config)
+verify = create_email_verification_token(sub="user-123", auth_config=config)
 
 # With scopes and extra claims
 access = create_access_token(
     sub="user-123",
-    config=config,
+    auth_config=config,
     scopes=["read", "write"],
     extra={"tenant_id": "acme"},
 )
 
-# Decode
-payload = decode_token(access, config)
+# Decode (with optional type validation)
+payload = decode_token(access, auth_config=config, expected_type="access")
 print(payload.sub)         # "user-123"
 print(payload.token_type)  # "access"
 print(payload.scopes)      # ["read", "write"]
