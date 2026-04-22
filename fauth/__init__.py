@@ -12,6 +12,7 @@ from .core import (
 )
 from .crypto import (
     create_access_token,
+    create_password_reset_token,
     create_refresh_token,
     create_token,
     decode_token,
@@ -38,6 +39,7 @@ __all__ = [
     "Transport",
     "UserLoader",
     "create_access_token",
+    "create_password_reset_token",
     "create_refresh_token",
     "create_token",
     "decode_token",
