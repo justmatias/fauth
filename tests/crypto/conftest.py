@@ -19,4 +19,7 @@ def expired_config() -> AuthConfig:
         secret_key="test-jwt-secret",
         algorithm="HS256",
         access_token_expire_minutes=0,
+        refresh_token_expire_minutes=0,
+        password_reset_token_expire_minutes=0,
+        email_verification_token_expire_minutes=0,
     )
