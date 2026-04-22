@@ -9,4 +9,5 @@ class AuthConfig(BaseSettings):
     access_token_expire_minutes: int = 15
     refresh_token_expire_minutes: int = 60 * 24 * 7  # 7 days
     password_reset_token_expire_minutes: int = 15
+    email_verification_token_expire_minutes: int = 60 * 24  # 1 day
     token_type: Literal["bearer"] = "bearer"

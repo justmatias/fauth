@@ -13,7 +13,7 @@ class TokenPayload(BaseModel):
     iat: int
     jti: str
     scopes: list[str] = Field(default_factory=list)
-    token_type: Literal["access", "refresh", "password_reset"]
+    token_type: Literal["access", "refresh", "password_reset", "email_verification"]
 
 
 class TokenResponse(BaseModel):

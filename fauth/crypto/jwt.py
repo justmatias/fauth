@@ -82,6 +82,23 @@ def create_password_reset_token(
     )
 
 
+def create_email_verification_token(
+    *,
+    sub: str,
+    auth_config: AuthConfig,
+    scopes: list[str] | None = None,
+    extra: dict[str, Any] | None = None,
+) -> str:
+    return create_token(
+        sub=sub,
+        token_type="email_verification",
+        expire_minutes=auth_config.email_verification_token_expire_minutes,
+        config=auth_config,
+        scopes=scopes,
+        extra=extra,
+    )
+
+
 def decode_token(
     token: str,
     *,
