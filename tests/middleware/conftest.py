@@ -1,9 +1,10 @@
 # pylint: disable=duplicate-code
-import time
+import datetime
 from typing import Any
 from uuid import UUID, uuid4
 
 import pytest
+import time_machine
 from fastapi import Depends, FastAPI, Request
 from fastapi.testclient import TestClient
 from pydantic import BaseModel, Field
@@ -142,14 +143,10 @@ def user_token(auth_config: AuthConfig, user: DummyUser) -> str:
 
 @pytest.fixture
 def expired_token(auth_config: AuthConfig) -> str:
-    expired_config = AuthConfig(
-        secret_key=auth_config.secret_key,
-        algorithm=auth_config.algorithm,
-        access_token_expire_minutes=0,
-    )
-    token = create_access_token(sub="any-user", auth_config=expired_config)
-    time.sleep(1)
-    return token
+    with time_machine.travel(
+        datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=1)
+    ):
+        return create_access_token(sub="any-user", auth_config=auth_config)
 
 
 @pytest.fixture

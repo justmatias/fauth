@@ -1,7 +1,8 @@
-import time
+import datetime
 from collections.abc import Callable
 
 import pytest
+import time_machine
 
 from fauth.core import AuthConfig, InvalidTokenError, TokenExpiredError
 from fauth.crypto import (
@@ -83,13 +84,17 @@ def test_create_token_includes_extra_claims(
     ],
 )
 def test_decode_token_raises_on_expired(
-    create_token_function: Callable[..., str], expired_config: AuthConfig
+    create_token_function: Callable[..., str], config: AuthConfig
 ) -> None:
-    token = create_token_function(sub="user-1", auth_config=expired_config)
-    time.sleep(1)
+    token = create_token_function(sub="user-1", auth_config=config)
 
-    with pytest.raises(TokenExpiredError):
-        decode_token(token, auth_config=expired_config)
+    with (
+        time_machine.travel(
+            datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=30)
+        ),
+        pytest.raises(TokenExpiredError),
+    ):
+        decode_token(token, auth_config=config)
 
 
 def test_decode_token_raises_on_invalid(config: AuthConfig) -> None:

@@ -39,6 +39,7 @@ dev = [
     "pre-commit>=4.4",
     "httpx>=0.28.1",
     "polyfactory>=3.3.0",
+    "time-machine>=3.2.0",
 ]
 
 [project.urls]
