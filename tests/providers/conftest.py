@@ -9,7 +9,7 @@ from fastapi import Depends, FastAPI
 from fastapi.testclient import TestClient
 from pydantic import BaseModel, Field
 
-from fauth.core import AuthConfig
+from fauth.core import AuthConfig, TokenPayload
 from fauth.crypto import create_access_token, create_refresh_token, hash_password
 from fauth.providers import AuthProvider
 from fauth.testing import FakeIdentityLoader, FakeUserLoader
@@ -122,6 +122,12 @@ def fastapi_app(provider: AuthProvider[DummyUser]) -> FastAPI:
         user: DummyUser = Depends(provider.require_permissions(["write"])),
     ) -> dict[str, Any]:
         return {"id": str(user.id_)}
+
+    @app.get("/token-payload")
+    def get_token_payload(
+        payload: TokenPayload = Depends(provider.get_token_payload),
+    ) -> dict[str, Any]:
+        return {"sub": payload.sub}
 
     return app
 

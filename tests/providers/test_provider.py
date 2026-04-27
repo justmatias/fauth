@@ -20,31 +20,31 @@ from .conftest import (
 
 def test_require_user_expired_token(client: TestClient, expired_token: str) -> None:
     response = client.get("/user", headers={"Authorization": f"Bearer {expired_token}"})
-    assert response.status_code == 401
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
     assert response.json()["detail"] == "Token expired"
 
 
 def test_require_user_invalid_token(client: TestClient) -> None:
     response = client.get("/user", headers={"Authorization": "Bearer not.a.real.jwt"})
-    assert response.status_code == 401
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
     assert response.json()["detail"] == "Invalid token: Failure when decoding token"
 
 
 @pytest.mark.usefixtures("_populate_user")
 def test_require_user_valid(client: TestClient, user_token: str) -> None:
     response = client.get("/user", headers={"Authorization": f"Bearer {user_token}"})
-    assert response.status_code == 200
+    assert response.status_code == status.HTTP_200_OK
 
 
 def test_require_user_unknown_user(client: TestClient, user_token: str) -> None:
     response = client.get("/user", headers={"Authorization": f"Bearer {user_token}"})
-    assert response.status_code == 401
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
     assert response.json()["detail"] == "User does not exist"
 
 
 def test_require_user_no_token(client: TestClient) -> None:
     response = client.get("/user")
-    assert response.status_code == 401
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
     assert response.json()["detail"] == "Not authenticated"
 
 
@@ -56,14 +56,14 @@ def test_require_active_user_denied(
         "/active-user",
         headers={"Authorization": f"Bearer {inactive_user_token}"},
     )
-    assert response.status_code == 400
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json()["detail"] == "Inactive user"
 
 
 @pytest.mark.usefixtures("_populate_user")
 def test_require_roles_granted(client: TestClient, user_token: str) -> None:
     response = client.get("/admin", headers={"Authorization": f"Bearer {user_token}"})
-    assert response.status_code == 200
+    assert response.status_code == status.HTTP_200_OK
 
 
 @pytest.mark.usefixtures("_populate_user_with_singular_role")
@@ -74,7 +74,7 @@ def test_require_roles_with_singular_role_fallback(
     response = client.get(
         "/admin", headers={"Authorization": f"Bearer {user_with_singular_role_token}"}
     )
-    assert response.status_code == 200
+    assert response.status_code == status.HTTP_200_OK
 
 
 @pytest.mark.asyncio
@@ -115,14 +115,14 @@ def test_require_roles_denied(client: TestClient, no_roles_user_token: str) -> N
     response = client.get(
         "/admin", headers={"Authorization": f"Bearer {no_roles_user_token}"}
     )
-    assert response.status_code == 403
+    assert response.status_code == status.HTTP_403_FORBIDDEN
     assert "Missing role: admin" in response.json()["detail"]
 
 
 @pytest.mark.usefixtures("_populate_user")
 def test_require_permissions_granted(client: TestClient, user_token: str) -> None:
     response = client.get("/writer", headers={"Authorization": f"Bearer {user_token}"})
-    assert response.status_code == 200
+    assert response.status_code == status.HTTP_200_OK
 
 
 @pytest.mark.usefixtures("_populate_no_perms_user")
@@ -132,7 +132,7 @@ def test_require_permissions_denied(
     response = client.get(
         "/writer", headers={"Authorization": f"Bearer {no_perms_user_token}"}
     )
-    assert response.status_code == 403
+    assert response.status_code == status.HTTP_403_FORBIDDEN
     assert "requires write permission" in response.json()["detail"]
 
 
@@ -280,3 +280,17 @@ async def test_refresh_invalid_token(provider: AuthProvider[DummyUser]) -> None:
         await provider.refresh("invalid.token.str")
     assert excinfo.value.status_code == status.HTTP_401_UNAUTHORIZED
     assert excinfo.value.detail == "Invalid token: Failure when decoding token"
+
+
+def test_get_token_payload_success(client: TestClient, user_token: str) -> None:
+    response = client.get(
+        "/token-payload", headers={"Authorization": f"Bearer {user_token}"}
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert "sub" in response.json()
+
+
+def test_get_token_payload_no_token(client: TestClient) -> None:
+    response = client.get("/token-payload")
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.json()["detail"] == "Not authenticated"
