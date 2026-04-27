@@ -1,6 +1,23 @@
 # CHANGELOG
 
 
+## v0.5.4 (2026-04-27)
+
+### Bug Fixes
+
+- Add get_token_payload dependency for token verification in provider
+  ([#45](https://github.com/justmatias/fauth/pull/45),
+  [`a0eccaf`](https://github.com/justmatias/fauth/commit/a0eccaf5ef732e0f5c8ba2f0c4d6dcfb6bc6bd1b))
+
+* fix: add get_token_payload dependency for token verification in provider
+
+* chore(config): update pre-commit hooks
+
+---------
+
+Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+
+
 ## v0.5.3 (2026-04-22)
 
 ### Bug Fixes
