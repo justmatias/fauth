@@ -204,6 +204,16 @@ class AuthProvider(Generic[T]):
             token_type=self.config.token_type,
         )
 
+    async def get_token_payload(self, request: Request) -> TokenPayload:
+        """Dependency returning the current access token's payload."""
+        token = await self.transport(request)
+        if not token:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Not authenticated",
+            )
+        return await self.verify_token(token, expected_type="access")
+
     async def verify_token(
         self, token: str, expected_type: str | None = None
     ) -> TokenPayload:
