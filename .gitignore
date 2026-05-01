@@ -56,5 +56,7 @@ dmypy.txt
 .DS_Store
 Thumbs.db
 
+site/
+
 .env
 .env.*
