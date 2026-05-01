@@ -1,0 +1,39 @@
+site_name: FAuth
+site_description: Ergonomic, lightweight JWT authentication for FastAPI
+site_url: https://fauth.readthedocs.io/
+repo_url: https://github.com/justmatias/fauth
+repo_name: justmatias/fauth
+
+docs_dir: docs
+
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.sections
+    - search.highlight
+  palette:
+    - scheme: default
+      primary: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+plugins:
+  - include-markdown
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - admonition
+  - tables
+
+nav:
+  - Home: index.md
+  - Changelog: changelog.md
