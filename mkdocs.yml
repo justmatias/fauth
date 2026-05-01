@@ -25,7 +25,7 @@ theme:
         name: Switch to light mode
 
 plugins:
-  - include-markdown
+  - search
 
 markdown_extensions:
   - pymdownx.highlight:
@@ -36,4 +36,14 @@ markdown_extensions:
 
 nav:
   - Home: index.md
+  - Getting Started: getting-started.md
+  - API Reference: api-reference.md
+  - Crypto Utilities: crypto.md
+  - Authentication: authentication.md
+  - Authorization: authorization.md
+  - Transports: transports.md
+  - Secure Router: secure-router.md
+  - Testing: testing.md
+  - Logging: logging.md
+  - Error Handling: error-handling.md
   - Changelog: changelog.md
