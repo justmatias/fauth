@@ -40,12 +40,18 @@ class AuthProvider(Generic[T]):
         transport: Transport | None = None,
         token_payload_schema: type[TokenPayload] = TokenPayload,
         password_field_name: str = "hashed_password",
+        roles_field_name: str = "roles",
+        permissions_field_name: str = "permissions",
+        active_status_field_name: str = "is_active",
     ):
         self.config = config
         self.user_loader = user_loader
         self.identity_loader = identity_loader
         self.token_payload_schema = token_payload_schema
         self.password_field_name = password_field_name
+        self.roles_field_name = roles_field_name
+        self.permissions_field_name = permissions_field_name
+        self.active_status_field_name = active_status_field_name
 
         if not transport:
             transport = BearerTransport()
@@ -91,7 +97,8 @@ class AuthProvider(Generic[T]):
     async def require_active_user(self, request: Request) -> T:
         """Utility to get the currently authenticated active user."""
         user = await self.require_user(request)
-        if hasattr(user, "is_active") and not user.is_active:
+        active = getattr(user, self.active_status_field_name, True)
+        if not active:
             await logger.warning("Authorization failed", reason="Inactive user")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -105,11 +112,7 @@ class AuthProvider(Generic[T]):
         async def role_checker(
             user: Annotated[T, Depends(self.require_active_user)],
         ) -> T:
-            roles = list(getattr(user, "roles", []))
-            role = getattr(user, "role", None)
-
-            if role is not None:
-                roles.append(role)
+            roles = list(getattr(user, self.roles_field_name, []))
 
             required_roles_set = set(required_roles)
             for role in required_roles_set:
@@ -130,7 +133,7 @@ class AuthProvider(Generic[T]):
         async def permission_checker(
             user: Annotated[T, Depends(self.require_active_user)],
         ) -> T:
-            user_permissions = getattr(user, "permissions", [])
+            user_permissions = getattr(user, self.permissions_field_name, [])
             required_permissions = set(permissions)
             for permission in required_permissions:
                 if permission not in user_permissions:
@@ -169,8 +172,8 @@ class AuthProvider(Generic[T]):
                 detail="Invalid credentials",
             )
 
-        # Ensure user is active if it has is_active attribute
-        if hasattr(user, "is_active") and not user.is_active:
+        active = getattr(user, self.active_status_field_name, True)
+        if not active:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Inactive user",
@@ -250,7 +253,8 @@ class AuthProvider(Generic[T]):
                 detail="User does not exist",
             )
 
-        if hasattr(user, "is_active") and not user.is_active:
+        active = getattr(user, self.active_status_field_name, True)
+        if not active:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Inactive user",

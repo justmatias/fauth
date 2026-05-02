@@ -20,14 +20,6 @@ class Role(enum.Enum):
     USER = "user"
 
 
-class DummyUser(BaseModel):
-    id_: UUID = Field(default_factory=uuid4)
-    hashed_password: str = Field(default=hash_password("secret_password"))
-    is_active: bool = Field(default=True)
-    roles: list[str] = Field(default_factory=list)
-    permissions: list[str] = Field(default_factory=list)
-
-
 class StringRoleUser(BaseModel):
     id_: UUID = Field(default_factory=uuid4)
     is_active: bool = Field(default=True)
@@ -65,11 +57,6 @@ def string_role_user() -> StringRoleUser:
 @pytest.fixture
 def enum_role_user() -> EnumRoleUser:
     return EnumRoleUser()
-
-
-@pytest.fixture
-def combined_roles_user() -> CombinedRolesUser:
-    return CombinedRolesUser()
 
 
 @pytest.fixture

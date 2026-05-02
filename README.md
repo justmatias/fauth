@@ -16,7 +16,7 @@ An ergonomic, plug-and-play authentication library for FastAPI.
 - **Pluggable Transports** — Extensible `Transport` protocol with a built-in `BearerTransport`.
 - **Automatic OpenAPI/Swagger UI Support** — Integrated security schemes with "Authorize" button in Swagger UI.
 - **Built-in Password Hashing & JWT Crypto** — Argon2 via `pwdlib` and utilities for creating/decoding access and refresh tokens.
-- **RBAC** — `require_roles` and `require_permissions` dependencies for endpoint authorization.
+- **RBAC** — `require_roles` and `require_permissions` dependencies with customizable user model field names.
 - **Secure Router** — `SecureAPIRouter` secures all its routes automatically.
 - **Structured Logging** — Built-in `structlog`-based logging.
 - **Type Safe** — Fully annotated for MyPy and IDE integration.

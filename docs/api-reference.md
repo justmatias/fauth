@@ -53,7 +53,10 @@ AuthProvider(
     identity_loader: IdentityLoader[T] | None = None, # Required for authenticate()
     transport: Transport | None = None,               # Defaults to BearerTransport()
     token_payload_schema: type[TokenPayload] = TokenPayload,
-    password_field_name: str = "hashed_password",      # Attribute on user model holding the hash
+    password_field_name: str = "hashed_password",      # Attribute holding the password hash
+    roles_field_name: str = "roles",                   # Attribute holding the user's roles
+    permissions_field_name: str = "permissions",       # Attribute holding the user's permissions
+    active_status_field_name: str = "is_active",       # Attribute indicating if the user is active
 )
 ```
 
