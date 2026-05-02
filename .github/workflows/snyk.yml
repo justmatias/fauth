@@ -10,9 +10,6 @@ on:
 jobs:
   snyk_scan:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.12", "3.13", "3.14"]
     steps:
       - uses: actions/checkout@v6
         with:
@@ -22,7 +19,7 @@ jobs:
       - name: Setup environment
         uses: ./.github/actions/setup-python-env
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.13"
 
       - name: Export dependencies
         run: uv export --format requirements-txt --output-file requirements.txt
