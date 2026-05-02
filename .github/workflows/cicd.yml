@@ -82,11 +82,56 @@ jobs:
           git diff --staged --quiet || git commit -m "chore(config): update pre-commit hooks"
           git push origin "HEAD:${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}"
 
+  breaking-changes:
+    name: Detect breaking changes
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    needs: [lint, test]
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GH_TOKEN || secrets.GITHUB_TOKEN }}
+          ref: main
+          fetch-depth: 0
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-python-env
+        with:
+          python-version: "3.13"
+
+      - name: Get proposed version
+        id: proposed
+        run: |
+          VERSION=$(pipx run --spec python-semantic-release semantic-release --noop version --print)
+          echo "proposed=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Run pycracks
+        id: pycracks
+        continue-on-error: true
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        run: |
+          pipx run pycracks \
+            --path "tests" \
+            --target-version "${{ steps.proposed.outputs.proposed }}" \
+            --test-command "uv run poe test"
+
+      - name: Create breaking change commit
+        if: steps.pycracks.outcome == 'failure'
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git commit --allow-empty \
+            -m "feat!: breaking change detected [skip ci]"
+          git push origin main
+
   versioning:
     name: Versioning
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    needs: [lint, test]
+    needs: [breaking-changes]
     steps:
       - uses: actions/checkout@v6
         with:
