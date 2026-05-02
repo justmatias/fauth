@@ -5,11 +5,10 @@ from pydantic import BaseModel, Field
 
 from fauth.core import AuthConfig
 from fauth.crypto import hash_password
-from fauth.providers import AuthProvider
-from fauth.testing import FakeIdentityLoader
+from fauth.providers import AuthProvider, FieldNames
+from tests.conftest import FakeIdentityLoader
 
 from .conftest import (
-    CombinedRolesUser,
     DummyUser,
     EnumRoleUser,
     FakeUserLoader,
@@ -79,10 +78,14 @@ def test_require_roles_with_singular_role_fallback(
 
 @pytest.mark.asyncio
 @pytest.mark.regression
-async def test_require_roles_with_string_role_fallback(
-    provider: AuthProvider[DummyUser],
+async def test_require_roles_with_custom_roles_field_name(
+    auth_config: AuthConfig,
     string_role_user: StringRoleUser,
 ) -> None:
+    loader = FakeUserLoader[StringRoleUser]()
+    provider = AuthProvider(
+        config=auth_config, user_loader=loader, field_names=FieldNames(roles="role")
+    )
     role_checker = provider.require_roles(["admin"])
     result = await role_checker(string_role_user)
     assert result.id_ == string_role_user.id_
@@ -90,21 +93,14 @@ async def test_require_roles_with_string_role_fallback(
 
 @pytest.mark.asyncio
 @pytest.mark.regression
-async def test_require_roles_combined_roles_and_role(
-    provider: AuthProvider[DummyUser],
-    combined_roles_user: CombinedRolesUser,
-) -> None:
-    role_checker = provider.require_roles(["admin"])
-    result = await role_checker(combined_roles_user)
-    assert result.id_ == combined_roles_user.id_
-
-
-@pytest.mark.asyncio
-@pytest.mark.regression
-async def test_require_roles_with_enum_role_fallback(
-    provider: AuthProvider[DummyUser],
+async def test_require_roles_with_custom_roles_field_name_enum(
+    auth_config: AuthConfig,
     enum_role_user: EnumRoleUser,
 ) -> None:
+    loader = FakeUserLoader[EnumRoleUser]()
+    provider = AuthProvider(
+        config=auth_config, user_loader=loader, field_names=FieldNames(roles="role")
+    )
     role_checker = provider.require_roles([Role.ADMIN])
     result = await role_checker(enum_role_user)
     assert result.id_ == enum_role_user.id_
@@ -203,7 +199,7 @@ async def test_authenticate_custom_password_field(auth_config: AuthConfig) -> No
         config=auth_config,
         user_loader=user_loader,
         identity_loader=identity_loader,
-        password_field_name="pw",
+        field_names=FieldNames(password="pw"),
     )
 
     identity_loader.add_user("alice", CustomUser(id="user-1"))

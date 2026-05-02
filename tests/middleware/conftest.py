@@ -13,7 +13,7 @@ from fauth.core import AuthConfig
 from fauth.crypto import create_access_token, hash_password
 from fauth.middleware import AuthMiddleware
 from fauth.providers import AuthProvider
-from fauth.testing import FakeUserLoader
+from tests.conftest import FakeUserLoader
 
 
 class DummyUser(BaseModel):
@@ -56,10 +56,6 @@ def app(
     async def protected(request: Request) -> dict[str, Any]:
         return {"id": str(request.state.user.id_)}
 
-    @_app.get("/public")
-    async def public() -> dict[str, Any]:
-        return {"msg": "ok"}
-
     return _app
 
 
@@ -101,10 +97,6 @@ def app_with_excludes(
     @_app.get("/health")
     async def health() -> dict[str, Any]:
         return {"status": "ok"}
-
-    @_app.get("/protected")
-    async def protected(request: Request) -> dict[str, Any]:
-        return {"id": str(request.state.user.id_)}
 
     return _app
 

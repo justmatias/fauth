@@ -53,9 +53,18 @@ AuthProvider(
     identity_loader: IdentityLoader[T] | None = None, # Required for authenticate()
     transport: Transport | None = None,               # Defaults to BearerTransport()
     token_payload_schema: type[TokenPayload] = TokenPayload,
-    password_field_name: str = "hashed_password",      # Attribute on user model holding the hash
+    field_names: FieldNames = FieldNames(),            # Customize user model field names
 )
 ```
+
+`FieldNames` is a dataclass with these defaults:
+
+| Attribute       | Default             | Used by                                              |
+| --------------- | ------------------- | ---------------------------------------------------- |
+| `password`      | `"hashed_password"` | `authenticate()`                                     |
+| `active_status` | `"is_active"`       | `authenticate()`, `require_active_user()`, `refresh()` |
+| `roles`         | `"roles"`           | `require_roles()`                                    |
+| `permissions`   | `"permissions"`     | `require_permissions()`                              |
 
 ### Methods
 

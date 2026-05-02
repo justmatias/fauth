@@ -21,7 +21,7 @@ from .crypto import (
     verify_password,
 )
 from .middleware import AuthMiddleware
-from .providers import AuthProvider, UserLoader
+from .providers import AuthProvider, FieldNames, UserLoader
 from .transports import BearerTransport, Transport
 
 __version__ = version("fauth")
@@ -32,6 +32,7 @@ __all__ = [
     "AuthProvider",
     "BearerTransport",
     "FAuthError",
+    "FieldNames",
     "InvalidTokenError",
     "SecureAPIRouter",
     "TokenExpiredError",
