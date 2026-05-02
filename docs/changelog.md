@@ -1,6 +1,36 @@
 # CHANGELOG
 
 
+## v0.5.5 (2026-05-02)
+
+### Bug Fixes
+
+- Remove matrix in snyk checks ([#49](https://github.com/justmatias/fauth/pull/49),
+  [`fe436ad`](https://github.com/justmatias/fauth/commit/fe436adb901eec6304915331dd8e28f96835af94))
+
+### Chores
+
+- Implement mkdocs documentation with read the docs integration
+  ([#46](https://github.com/justmatias/fauth/pull/46),
+  [`c774145`](https://github.com/justmatias/fauth/commit/c77414545a8b6acc5e0edbf7c8bbfc67e5419e02))
+
+- Restructure documentation ([#47](https://github.com/justmatias/fauth/pull/47),
+  [`e96d2c1`](https://github.com/justmatias/fauth/commit/e96d2c1f14fabd590a9bf2578123828ab99a54c1))
+
+### Refactoring
+
+- Remove dead testing module ([#48](https://github.com/justmatias/fauth/pull/48),
+  [`60202e5`](https://github.com/justmatias/fauth/commit/60202e5d86f4a9597c9f2c296a711e4f6ae0ce89))
+
+* refactor: remove dead testing module
+
+* fix: allow custom fields for require methods
+
+* fix: introduce FieldNames for customizable user model field names
+
+* chore: add pycraks for detecting breaking changes
+
+
 ## v0.5.4 (2026-04-27)
 
 ### Bug Fixes
