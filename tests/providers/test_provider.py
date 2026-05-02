@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 from fauth.core import AuthConfig
 from fauth.crypto import hash_password
 from fauth.providers import AuthProvider
-from fauth.testing import FakeIdentityLoader
+from tests.conftest import FakeIdentityLoader
 
 from .conftest import (
     CombinedRolesUser,

@@ -10,7 +10,7 @@ from fauth.api import SecureAPIRouter
 from fauth.core import AuthConfig
 from fauth.crypto import create_access_token
 from fauth.providers import AuthProvider
-from fauth.testing import FakeUserLoader
+from tests.conftest import FakeUserLoader
 
 
 class DummyUser(BaseModel):

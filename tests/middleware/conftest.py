@@ -13,7 +13,7 @@ from fauth.core import AuthConfig
 from fauth.crypto import create_access_token, hash_password
 from fauth.middleware import AuthMiddleware
 from fauth.providers import AuthProvider
-from fauth.testing import FakeUserLoader
+from tests.conftest import FakeUserLoader
 
 
 class DummyUser(BaseModel):

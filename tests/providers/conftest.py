@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 from fauth.core import AuthConfig, TokenPayload
 from fauth.crypto import create_access_token, create_refresh_token, hash_password
 from fauth.providers import AuthProvider
-from fauth.testing import FakeIdentityLoader, FakeUserLoader
+from tests.conftest import FakeIdentityLoader, FakeUserLoader
 
 
 class Role(enum.Enum):

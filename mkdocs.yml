@@ -43,7 +43,6 @@ nav:
   - Authorization: authorization.md
   - Transports: transports.md
   - Secure Router: secure-router.md
-  - Testing: testing.md
   - Logging: logging.md
   - Error Handling: error-handling.md
   - Changelog: changelog.md

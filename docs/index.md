@@ -14,7 +14,6 @@ An ergonomic, plug-and-play authentication library for FastAPI.
 - **RBAC** — Flexible `require_roles` and `require_permissions` dependencies for endpoint authorization.
 - **Secure Router** — `SecureAPIRouter` applies authentication as a router-level dependency, securing all its routes automatically.
 - **Structured Logging** — Built-in `structlog`-based logging for authentication events, token operations, and security failures.
-- **Testing Utilities** — Ships fake implementations (`FakeUserLoader`) and a `build_fake_auth_provider()` factory so consumers can write unit tests with zero boilerplate.
 - **Type Safety** — Fully annotated for MyPy and IDE integration.
 
 ## Installation
