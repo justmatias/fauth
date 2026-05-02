@@ -21,6 +21,7 @@ from fauth.crypto import (
 from fauth.transports import BearerTransport, Transport
 from fauth.utils import logger
 
+from .field_names import FieldNames
 from .protocols import IdentityLoader, UserLoader
 
 T = TypeVar("T")
@@ -32,26 +33,20 @@ class AuthProvider(Generic[T]):
     and returns dependencies for routes.
     """
 
-    def __init__(  # pylint: disable=too-many-arguments, too-many-positional-arguments
+    def __init__(  # pylint: disable=too-many-positional-arguments, too-many-arguments
         self,
         config: AuthConfig,
         user_loader: UserLoader[T],
         identity_loader: IdentityLoader[T] | None = None,
         transport: Transport | None = None,
         token_payload_schema: type[TokenPayload] = TokenPayload,
-        password_field_name: str = "hashed_password",
-        roles_field_name: str = "roles",
-        permissions_field_name: str = "permissions",
-        active_status_field_name: str = "is_active",
+        field_names: FieldNames | None = None,
     ):
         self.config = config
         self.user_loader = user_loader
         self.identity_loader = identity_loader
         self.token_payload_schema = token_payload_schema
-        self.password_field_name = password_field_name
-        self.roles_field_name = roles_field_name
-        self.permissions_field_name = permissions_field_name
-        self.active_status_field_name = active_status_field_name
+        self.field_names = field_names or FieldNames()
 
         if not transport:
             transport = BearerTransport()
@@ -97,7 +92,7 @@ class AuthProvider(Generic[T]):
     async def require_active_user(self, request: Request) -> T:
         """Utility to get the currently authenticated active user."""
         user = await self.require_user(request)
-        active = getattr(user, self.active_status_field_name, True)
+        active = getattr(user, self.field_names.active_status, True)
         if not active:
             await logger.warning("Authorization failed", reason="Inactive user")
             raise HTTPException(
@@ -112,7 +107,11 @@ class AuthProvider(Generic[T]):
         async def role_checker(
             user: Annotated[T, Depends(self.require_active_user)],
         ) -> T:
-            roles = list(getattr(user, self.roles_field_name, []))
+            raw = getattr(user, self.field_names.roles, [])
+            if isinstance(raw, (str, enum.Enum)):
+                roles = [raw]
+            else:
+                roles = list(raw)
 
             required_roles_set = set(required_roles)
             for role in required_roles_set:
@@ -133,7 +132,7 @@ class AuthProvider(Generic[T]):
         async def permission_checker(
             user: Annotated[T, Depends(self.require_active_user)],
         ) -> T:
-            user_permissions = getattr(user, self.permissions_field_name, [])
+            user_permissions = getattr(user, self.field_names.permissions, [])
             required_permissions = set(permissions)
             for permission in required_permissions:
                 if permission not in user_permissions:
@@ -165,14 +164,14 @@ class AuthProvider(Generic[T]):
                 detail="Invalid credentials",
             )
 
-        hashed = getattr(user, self.password_field_name, None)
+        hashed = getattr(user, self.field_names.password, None)
         if not hashed or not verify_password(password, hashed):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid credentials",
             )
 
-        active = getattr(user, self.active_status_field_name, True)
+        active = getattr(user, self.field_names.active_status, True)
         if not active:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -253,7 +252,7 @@ class AuthProvider(Generic[T]):
                 detail="User does not exist",
             )
 
-        active = getattr(user, self.active_status_field_name, True)
+        active = getattr(user, self.field_names.active_status, True)
         if not active:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,

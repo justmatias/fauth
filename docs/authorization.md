@@ -20,4 +20,4 @@ async def reports(user: User = Depends(auth.require_permissions(["read", "report
 
 Returns `403 Forbidden` with `{"detail": "Insufficient permissions: requires read permission"}` if the user lacks any of the required permissions.
 
-> **Field names:** By default, FAuth reads roles from `user.roles` and permissions from `user.permissions`. If your model uses different field names, pass `roles_field_name` or `permissions_field_name` to `AuthProvider` (e.g., `roles_field_name="groups", permissions_field_name="scopes"`).
+> **Field names:** By default, FAuth reads roles from `user.roles` and permissions from `user.permissions`. If your model uses different field names, pass a `FieldNames` instance to `AuthProvider` (e.g., `field_names=FieldNames(roles="groups", permissions="scopes")`).

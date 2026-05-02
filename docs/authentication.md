@@ -48,13 +48,15 @@ async def login(username: str, password: str):
 
 1. **User exists** — looks up the user via `IdentityLoader`. Raises `401` if not found.
 2. **Password is valid** — verifies the plain password against the hashed password stored on the user. Raises `401` if invalid.
-3. **User is active** — checks the user's active status field (defaults to `is_active`, customizable via `active_status_field_name`). Raises `401` if inactive.
+3. **User is active** — checks the user's active status field (defaults to `is_active`, configurable via `FieldNames(active_status=...)`). Raises `401` if inactive.
 
 ## Custom field names
 
-When your user model uses non-default attribute names, `AuthProvider` accepts field name overrides:
+When your user model uses non-default attribute names, pass a `FieldNames` instance to `AuthProvider`:
 
 ```python
+from fauth import AuthProvider, FieldNames
+
 class User(BaseModel):
     id: str
     pw_hash: str   # instead of hashed_password
@@ -64,17 +66,16 @@ auth = AuthProvider(
     config=config,
     user_loader=load_user,
     identity_loader=load_identity,
-    password_field_name="pw_hash",
-    active_status_field_name="active",
+    field_names=FieldNames(password="pw_hash", active_status="active"),
 )
 ```
 
-| Parameter                   | Default            | Used by                                    |
-| --------------------------- | ------------------ | ------------------------------------------ |
-| `password_field_name`       | `"hashed_password"` | `authenticate()`                           |
-| `active_status_field_name`  | `"is_active"`      | `authenticate()`, `require_active_user()`, `refresh()` |
-| `roles_field_name`          | `"roles"`          | `require_roles()`                          |
-| `permissions_field_name`    | `"permissions"`    | `require_permissions()`                    |
+| Attribute       | Default             | Used by                                              |
+| --------------- | ------------------- | ---------------------------------------------------- |
+| `password`      | `"hashed_password"` | `authenticate()`                                     |
+| `active_status` | `"is_active"`       | `authenticate()`, `require_active_user()`, `refresh()` |
+| `roles`         | `"roles"`           | `require_roles()`                                    |
+| `permissions`   | `"permissions"`     | `require_permissions()`                              |
 
 > **Note:** If `AuthProvider` is created without an `identity_loader`, calling `authenticate()` will raise a `RuntimeError`.
 

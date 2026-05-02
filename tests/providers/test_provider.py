@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 
 from fauth.core import AuthConfig
 from fauth.crypto import hash_password
-from fauth.providers import AuthProvider
+from fauth.providers import AuthProvider, FieldNames
 from tests.conftest import FakeIdentityLoader
 
 from .conftest import (
@@ -84,7 +84,7 @@ async def test_require_roles_with_custom_roles_field_name(
 ) -> None:
     loader = FakeUserLoader[StringRoleUser]()
     provider = AuthProvider(
-        config=auth_config, user_loader=loader, roles_field_name="role"
+        config=auth_config, user_loader=loader, field_names=FieldNames(roles="role")
     )
     role_checker = provider.require_roles(["admin"])
     result = await role_checker(string_role_user)
@@ -99,7 +99,7 @@ async def test_require_roles_with_custom_roles_field_name_enum(
 ) -> None:
     loader = FakeUserLoader[EnumRoleUser]()
     provider = AuthProvider(
-        config=auth_config, user_loader=loader, roles_field_name="role"
+        config=auth_config, user_loader=loader, field_names=FieldNames(roles="role")
     )
     role_checker = provider.require_roles([Role.ADMIN])
     result = await role_checker(enum_role_user)
@@ -199,7 +199,7 @@ async def test_authenticate_custom_password_field(auth_config: AuthConfig) -> No
         config=auth_config,
         user_loader=user_loader,
         identity_loader=identity_loader,
-        password_field_name="pw",
+        field_names=FieldNames(password="pw"),
     )
 
     identity_loader.add_user("alice", CustomUser(id="user-1"))

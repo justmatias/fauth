@@ -39,6 +39,16 @@ class CombinedRolesUser(BaseModel):
     role: str = "admin"
 
 
+class DummyUser(BaseModel):
+    id_: UUID = Field(default_factory=uuid4)
+    hashed_password: str = Field(
+        default_factory=lambda: hash_password("secret_password")
+    )
+    is_active: bool = Field(default=True)
+    roles: list[str] = Field(default_factory=list)
+    permissions: list[str] = Field(default_factory=list)
+
+
 @pytest.fixture
 def user() -> DummyUser:
     return DummyUser(roles=["admin"], permissions=["read", "write"])
@@ -92,12 +102,6 @@ def fastapi_app(provider: AuthProvider[DummyUser]) -> FastAPI:
     ) -> dict[str, Any]:
         return {"id": str(user.id_)}
 
-    @app.get("/active-user")
-    def get_active_user(
-        user: DummyUser = Depends(provider.require_active_user),
-    ) -> dict[str, Any]:
-        return {"id": str(user.id_)}
-
     @app.get("/admin")
     def get_admin(
         user: DummyUser = Depends(provider.require_roles(["admin"])),
@@ -108,6 +112,12 @@ def fastapi_app(provider: AuthProvider[DummyUser]) -> FastAPI:
     def get_writer(
         user: DummyUser = Depends(provider.require_permissions(["write"])),
     ) -> dict[str, Any]:
+        return {"id": str(user.id_)}
+
+    @app.get("/active-user")
+    def get_active_user(
+        user: DummyUser = Depends(provider.require_active_user),
+    ) -> dict[str, Any]:  # pragma: no cover
         return {"id": str(user.id_)}
 
     @app.get("/token-payload")
