@@ -59,8 +59,8 @@ repos:
           - pytest==9.0.2
           - polyfactory==3.2.0
           - fastapi==0.135.1
-          - pyjwt==2.11.0
           - pwdlib==0.3.0
+          - pyjwt==2.11.0
 
   - repo: https://github.com/hadolint/hadolint
     rev: v2.14.0
