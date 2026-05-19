@@ -1,6 +1,6 @@
 [project]
 name = "fauth"
-version = "0.5.5"
+version = "0.5.6"
 description = "Ergonomic, lightweight JWT authentication for FastAPI. Secure your routes instantly with plug-and-play dependency injection"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -29,6 +29,17 @@ dependencies = [
   "structlog>=25.5.0",
 ]
 
+[project.urls]
+Homepage = "https://github.com/justmatias/fauth"
+Repository = "https://github.com/justmatias/fauth"
+Issues = "https://github.com/justmatias/fauth/issues"
+Changelog = "https://github.com/justmatias/fauth/blob/main/docs/changelog.md"
+Documentation = "https://fauth.readthedocs.io/"
+
+[project.optional-dependencies]
+docs = ["mkdocs>=1.6", "mkdocs-material>=9.6"]
+
+
 [dependency-groups]
 dev = [
   "pytest>=9.0.2",
@@ -41,16 +52,6 @@ dev = [
   "polyfactory>=3.3.0",
   "time-machine>=3.2.0",
 ]
-
-[project.urls]
-Homepage = "https://github.com/justmatias/fauth"
-Repository = "https://github.com/justmatias/fauth"
-Issues = "https://github.com/justmatias/fauth/issues"
-Changelog = "https://github.com/justmatias/fauth/blob/main/docs/changelog.md"
-Documentation = "https://fauth.readthedocs.io/"
-
-[project.optional-dependencies]
-docs = ["mkdocs>=1.6", "mkdocs-material>=9.6"]
 
 [build-system]
 requires = ["hatchling"]
