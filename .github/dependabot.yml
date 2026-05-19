@@ -5,4 +5,6 @@ updates:
     schedule:
       interval: 'weekly'
     commit-message:
-      prefix: 'fix(deps)'
+      prefix: 'fix'
+      prefix-development: 'fix'
+      include: 'scope'

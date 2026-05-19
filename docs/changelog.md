@@ -1,6 +1,43 @@
 # CHANGELOG
 
 
+## v0.5.6 (2026-05-19)
+
+### Bug Fixes
+
+- Correct dependabot commit-message configuration
+  ([`73cb015`](https://github.com/justmatias/fauth/commit/73cb015bb62eb43c670d66b338185b2438071126))
+
+### Chores
+
+- Configure dependabot commit message prefix
+  ([`ef80b6d`](https://github.com/justmatias/fauth/commit/ef80b6dc4d10400835a9681bb67c71ce7f20c67e))
+
+- **deps**: Bump urllib3 from 2.6.3 to 2.7.0 ([#50](https://github.com/justmatias/fauth/pull/50),
+  [`a4e009e`](https://github.com/justmatias/fauth/commit/a4e009e0888a58dda996cd9e74a3994801a47ac0))
+
+* chore(deps): bump urllib3 from 2.6.3 to 2.7.0
+
+Bumps [urllib3](https://github.com/urllib3/urllib3) from 2.6.3 to 2.7.0. - [Release
+  notes](https://github.com/urllib3/urllib3/releases) -
+  [Changelog](https://github.com/urllib3/urllib3/blob/main/CHANGES.rst) -
+  [Commits](https://github.com/urllib3/urllib3/compare/2.6.3...2.7.0)
+
+--- updated-dependencies: - dependency-name: urllib3 dependency-version: 2.7.0
+
+dependency-type: indirect ...
+
+Signed-off-by: dependabot[bot] <support@github.com>
+
+* chore(config): update pre-commit hooks
+
+---------
+
+Co-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+
+Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+
+
 ## v0.5.5 (2026-05-02)
 
 ### Bug Fixes
