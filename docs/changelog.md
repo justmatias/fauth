@@ -1,6 +1,227 @@
 # CHANGELOG
 
 
+## v0.5.7 (2026-07-09)
+
+### Bug Fixes
+
+- Upgrade dependencies ([#59](https://github.com/justmatias/fauth/pull/59),
+  [`303c367`](https://github.com/justmatias/fauth/commit/303c367a9036f6066ad889ba945f25ac7dc99c7b))
+
+* fix: upgrade dependencies
+
+* chore(config): update pre-commit hooks
+
+* chore: pin GitHub Actions to commit SHAs and configure dependabot cooldown interval
+
+* docs: refactor getting-started guide with production-ready patterns and update navigation
+  structure
+
+* chore: remove loguru dependency from pre-commit hooks and cleanup dependabot configuration
+
+---------
+
+Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+
+- **deps**: Bump actions/checkout from 6 to 7 ([#57](https://github.com/justmatias/fauth/pull/57),
+  [`475bbc5`](https://github.com/justmatias/fauth/commit/475bbc5124de93ab45e2eb1a242ee677f647cf9f))
+
+* fix(deps): bump actions/checkout from 6 to 7
+
+Bumps [actions/checkout](https://github.com/actions/checkout) from 6 to 7. - [Release
+  notes](https://github.com/actions/checkout/releases) -
+  [Changelog](https://github.com/actions/checkout/blob/main/CHANGELOG.md) -
+  [Commits](https://github.com/actions/checkout/compare/v6...v7)
+
+--- updated-dependencies: - dependency-name: actions/checkout dependency-version: '7'
+
+dependency-type: direct:production
+
+update-type: version-update:semver-major ...
+
+Signed-off-by: dependabot[bot] <support@github.com>
+
+* chore(config): update pre-commit hooks
+
+---------
+
+Co-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+
+Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+
+Co-authored-by: Matías Giménez <matiasgimenez.dev@gmail.com>
+
+### Chores
+
+- Update CI/CD workflow to use RELEASE_TOKEN for checkout and semantic release
+  ([`6d0a151`](https://github.com/justmatias/fauth/commit/6d0a15137b90f28b94c04cf68cd2286872d8259a))
+
+- **deps**: Bump cryptography from 46.0.7 to 48.0.1
+  ([#55](https://github.com/justmatias/fauth/pull/55),
+  [`0ea6c47`](https://github.com/justmatias/fauth/commit/0ea6c4707d0e7fc74b34a3efec422717a3e34934))
+
+* chore(deps): bump cryptography from 46.0.7 to 48.0.1
+
+Bumps [cryptography](https://github.com/pyca/cryptography) from 46.0.7 to 48.0.1. -
+  [Changelog](https://github.com/pyca/cryptography/blob/main/CHANGELOG.rst) -
+  [Commits](https://github.com/pyca/cryptography/compare/46.0.7...48.0.1)
+
+--- updated-dependencies: - dependency-name: cryptography dependency-version: 48.0.1
+
+dependency-type: indirect ...
+
+Signed-off-by: dependabot[bot] <support@github.com>
+
+* chore(config): update pre-commit hooks
+
+---------
+
+Co-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+
+Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+
+Co-authored-by: Matías Giménez <matiasgimenez.dev@gmail.com>
+
+- **deps**: Bump idna from 3.11 to 3.15 ([#52](https://github.com/justmatias/fauth/pull/52),
+  [`e597725`](https://github.com/justmatias/fauth/commit/e597725385763954db7b0a696b476ba9e4f81895))
+
+* chore(deps): bump idna from 3.11 to 3.15
+
+Bumps [idna](https://github.com/kjd/idna) from 3.11 to 3.15. - [Release
+  notes](https://github.com/kjd/idna/releases) -
+  [Changelog](https://github.com/kjd/idna/blob/master/HISTORY.md) -
+  [Commits](https://github.com/kjd/idna/compare/v3.11...v3.15)
+
+--- updated-dependencies: - dependency-name: idna dependency-version: '3.15'
+
+dependency-type: indirect ...
+
+Signed-off-by: dependabot[bot] <support@github.com>
+
+* chore(config): update pre-commit hooks
+
+* fix: fix indentation in .pre-commit-config.yaml
+
+---------
+
+Co-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+
+Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+
+Co-authored-by: Matías Giménez <matiasgimenez.dev@gmail.com>
+
+- **deps**: Bump pydantic-settings from 2.13.1 to 2.14.2
+  ([#56](https://github.com/justmatias/fauth/pull/56),
+  [`8ff2078`](https://github.com/justmatias/fauth/commit/8ff20785dc97e72247cd25fd841de0c2d05d505a))
+
+* chore(deps): bump pydantic-settings from 2.13.1 to 2.14.2
+
+Bumps [pydantic-settings](https://github.com/pydantic/pydantic-settings) from 2.13.1 to 2.14.2. -
+  [Release notes](https://github.com/pydantic/pydantic-settings/releases) -
+  [Commits](https://github.com/pydantic/pydantic-settings/compare/v2.13.1...v2.14.2)
+
+--- updated-dependencies: - dependency-name: pydantic-settings dependency-version: 2.14.2
+
+dependency-type: direct:production ...
+
+Signed-off-by: dependabot[bot] <support@github.com>
+
+* chore(config): update pre-commit hooks
+
+* fix: simplify checkout token authentication by removing fallback to GH_TOKEN
+
+* chore: update checkout action to use only GITHUB_TOKEN in security workflows
+
+---------
+
+Co-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+
+Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+
+Co-authored-by: Matias Gimenez <matiasgimenez.dev@gmail.com>
+
+- **deps**: Bump pyjwt from 2.12.0 to 2.13.0 ([#54](https://github.com/justmatias/fauth/pull/54),
+  [`fce6e01`](https://github.com/justmatias/fauth/commit/fce6e0102d90282cbc28c436b1ca20afcfa2233c))
+
+* chore(deps): bump pyjwt from 2.12.0 to 2.13.0
+
+Bumps [pyjwt](https://github.com/jpadilla/pyjwt) from 2.12.0 to 2.13.0. - [Release
+  notes](https://github.com/jpadilla/pyjwt/releases) -
+  [Changelog](https://github.com/jpadilla/pyjwt/blob/master/CHANGELOG.rst) -
+  [Commits](https://github.com/jpadilla/pyjwt/compare/2.12.0...2.13.0)
+
+--- updated-dependencies: - dependency-name: pyjwt dependency-version: 2.13.0
+
+dependency-type: indirect ...
+
+Signed-off-by: dependabot[bot] <support@github.com>
+
+* chore(config): update pre-commit hooks
+
+---------
+
+Co-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+
+Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+
+Co-authored-by: Matías Giménez <matiasgimenez.dev@gmail.com>
+
+- **deps**: Bump pymdown-extensions from 10.21.2 to 10.21.3
+  ([#51](https://github.com/justmatias/fauth/pull/51),
+  [`df74259`](https://github.com/justmatias/fauth/commit/df74259cf16091988c849205987aeba0181fc5d3))
+
+* chore(deps): bump pymdown-extensions from 10.21.2 to 10.21.3
+
+Bumps [pymdown-extensions](https://github.com/facelessuser/pymdown-extensions) from 10.21.2 to
+  10.21.3. - [Release notes](https://github.com/facelessuser/pymdown-extensions/releases) -
+  [Commits](https://github.com/facelessuser/pymdown-extensions/compare/10.21.2...10.21.3)
+
+--- updated-dependencies: - dependency-name: pymdown-extensions dependency-version: 10.21.3
+
+dependency-type: indirect ...
+
+Signed-off-by: dependabot[bot] <support@github.com>
+
+* chore(config): update pre-commit hooks
+
+---------
+
+Co-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+
+Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+
+Co-authored-by: Matías Giménez <matiasgimenez.dev@gmail.com>
+
+- **deps**: Bump starlette from 0.52.1 to 1.0.1 ([#53](https://github.com/justmatias/fauth/pull/53),
+  [`251b1f8`](https://github.com/justmatias/fauth/commit/251b1f85fb30b189c4958b4c4a8b9d70c899927c))
+
+* chore(deps): bump starlette from 0.52.1 to 1.0.1
+
+Bumps [starlette](https://github.com/Kludex/starlette) from 0.52.1 to 1.0.1. - [Release
+  notes](https://github.com/Kludex/starlette/releases) -
+  [Changelog](https://github.com/Kludex/starlette/blob/main/docs/release-notes.md) -
+  [Commits](https://github.com/Kludex/starlette/compare/0.52.1...1.0.1)
+
+--- updated-dependencies: - dependency-name: starlette dependency-version: 1.0.1
+
+dependency-type: indirect ...
+
+Signed-off-by: dependabot[bot] <support@github.com>
+
+* chore(config): update pre-commit hooks
+
+---------
+
+Co-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+
+Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+
+### Documentation
+
+- Replace redirect index page with comprehensive Getting Started documentation
+  ([`3c93a9c`](https://github.com/justmatias/fauth/commit/3c93a9ce8a36b881b9e74588db9e24a6b3294030))
+
+
 ## v0.5.6 (2026-05-19)
 
 ### Bug Fixes
