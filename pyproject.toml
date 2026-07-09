@@ -30,7 +30,7 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/justmatias/fauth"
+Homepage = "https://fauth.readthedocs.io"
 Repository = "https://github.com/justmatias/fauth"
 Issues = "https://github.com/justmatias/fauth/issues"
 Changelog = "https://github.com/justmatias/fauth/blob/main/docs/changelog.md"

@@ -1,3 +1,5 @@
+<meta http-equiv="refresh" content="0; url=getting-started/">
+
 # FAuth
 
-**→ [Get Started](getting-started.md)**
+Redirecting to [Getting Started](getting-started.md)…
