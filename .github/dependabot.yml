@@ -10,4 +10,3 @@ updates:
       prefix: 'fix'
       prefix-development: 'fix'
       include: 'scope'
-

@@ -45,7 +45,6 @@ repos:
       - id: pylint
         types: [python]
         additional_dependencies:
-          - loguru==0.7.3
           - pydantic==2.13.4
           - pydantic-settings==2.14.2
           - pytest==9.1.1
@@ -57,7 +56,6 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies:
-          - loguru==0.7.3
           - pydantic==2.13.4
           - pydantic-settings==2.14.2
           - pytest==9.1.1
