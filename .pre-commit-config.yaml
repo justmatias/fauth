@@ -4,6 +4,11 @@ repos:
     hooks:
       - id: validate-pyproject
 
+  - repo: https://github.com/justmatias/hookpin
+    rev: v7.0.1
+    hooks:
+      - id: hookpin
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
@@ -40,27 +45,24 @@ repos:
       - id: pylint
         types: [python]
         additional_dependencies:
-          - loguru==0.7.3
-          - pydantic==2.12.4
-          - pydantic-settings==2.12
-          - uvicorn==0.38.0
-          - pytest==9.0.2
-          - polyfactory==3.2.0
-          - fastapi==0.135.1
+          - pydantic==2.13.4
+          - pydantic-settings==2.14.2
+          - pytest==9.1.1
+          - polyfactory==3.3.0
+          - fastapi==0.139.0
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v2.1.0
+    rev: v2.2.0
     hooks:
       - id: mypy
         additional_dependencies:
-          - loguru==0.7.3
-          - pydantic==2.12.4
-          - pydantic-settings==2.12
-          - pytest==9.0.2
-          - polyfactory==3.2.0
-          - fastapi==0.135.1
+          - pydantic==2.13.4
+          - pydantic-settings==2.14.2
+          - pytest==9.1.1
+          - polyfactory==3.3.0
+          - fastapi==0.139.0
           - pwdlib==0.3.0
-          - pyjwt==2.11.0
+          - pyjwt==2.13.0
 
   - repo: https://github.com/hadolint/hadolint
     rev: v2.14.0

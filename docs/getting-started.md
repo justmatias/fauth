@@ -1,160 +1,169 @@
 # Getting Started
 
-## Define your user model
+FAuth is an ergonomic, plug-and-play authentication library for FastAPI. It eliminates boilerplate around JWT, password hashing, user fetching, and Role-Based Access Control (RBAC) by leveraging FastAPI's Dependency Injection, Pydantic models, and Python Protocols.
 
-```python
-from pydantic import BaseModel
+## Installation
 
-class User(BaseModel):
-    id: str
-    username: str
-    hashed_password: str
-    is_active: bool = True
-    roles: list[str] = []
-    permissions: list[str] = []
+```bash
+pip install fauth
 ```
 
-## Implement the `UserLoader` and `IdentityLoader` protocols
+Or with [uv](https://github.com/astral-sh/uv):
 
-FAuth uses a callback-based approach. You provide functions that retrieve users from your data source:
-
-```python
-from fauth import TokenPayload, hash_password
-
-# Your database, ORM, or any data source
-DB: dict[str, User] = {
-    "user-123": User(
-        id="user-123",
-        username="alice",
-        hashed_password=hash_password("s3cret"),
-        roles=["admin"],
-        permissions=["read", "write"],
-    ),
-}
-
-# UserLoader — resolves a user from a decoded JWT
-async def load_user(payload: TokenPayload) -> User | None:
-    return DB.get(payload.sub)
-
-# IdentityLoader — resolves a user by identifier (for password authentication)
-async def load_identity(identifier: str) -> User | None:
-    return next((u for u in DB.values() if u.username == identifier), None)
+```bash
+uv add fauth
 ```
-
-## Create the AuthProvider
-
-```python
-from fauth import AuthConfig, AuthProvider
-
-config = AuthConfig(secret_key="my-super-secret-key")
-auth: AuthProvider[User] = AuthProvider(
-    config=config,
-    user_loader=load_user,
-    identity_loader=load_identity,
-)
-```
-
-## Wire it into FastAPI
-
-```python
-from fastapi import FastAPI, Depends
-
-app = FastAPI()
-
-@app.post("/login")
-async def login(username: str, password: str):
-    user = await auth.authenticate(username, password)
-    return await auth.login(sub=user.id)
-
-@app.get("/me")
-async def get_me(user: User = Depends(auth.require_user)):
-    return {"message": f"Hello {user.username}"}
-```
-
-That's it. The `/login` endpoint verifies credentials via `authenticate()`, then issues tokens via `login()`. The `/me` endpoint is protected — requests without a valid `Bearer` token will receive a `401 Unauthorized` response.
 
 ---
 
-## Full Example
+## Quick Setup
+
+The following example uses **SQLAlchemy async** — a common pattern in production FastAPI applications. The core concepts (user model, loaders, `AuthProvider`) apply to any database layer.
+
+### 1. Define your user model
 
 ```python
-from fastapi import FastAPI, Depends, HTTPException
-from fastapi.security import OAuth2PasswordRequestForm
-from pydantic import BaseModel
-from fauth import AuthConfig, AuthProvider, TokenPayload, SecureAPIRouter, hash_password
+# models.py
+from sqlalchemy import Boolean, String
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
-app = FastAPI()
 
-# 1. Define your internal user model
-class User(BaseModel):
-    id: str
-    username: str
-    hashed_password: str
-    is_active: bool = True
-    roles: list[str] = []
-    permissions: list[str] = []
+class Base(DeclarativeBase):
+    pass
 
-# Mock databases
-DB: dict[str, User] = {
-    "user-123": User(
-        id="user-123",
-        username="alice",
-        hashed_password=hash_password("s3cret"),
-        roles=["admin"],
-        permissions=["read", "write"],
-    )
-}
 
-# Identity lookup by username (used by authenticate)
-IDENTITY_DB: dict[str, User] = {
-    "alice": DB["user-123"],
-}
+class User(Base):
+    __tablename__ = "users"
 
-# 2. Define the callback that retrieves a user from the decoded JWT
-async def load_user(payload: TokenPayload) -> User | None:
-    return DB.get(payload.sub)
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    username: Mapped[str] = mapped_column(String, unique=True, index=True)
+    hashed_password: Mapped[str] = mapped_column(String)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    roles: Mapped[str] = mapped_column(String, default="")
+    permissions: Mapped[str] = mapped_column(String, default="")
+```
 
-# 3. Define the callback that retrieves a user by identifier (for password auth)
-async def load_identity(identifier: str) -> User | None:
-    return IDENTITY_DB.get(identifier)
+> FAuth works with any user object — SQLAlchemy, SQLModel, Tortoise ORM, a plain Pydantic model, or a dataclass. The only requirement is that the object exposes the fields referenced by `FieldNames` (defaults: `hashed_password`, `is_active`, `roles`, `permissions`).
 
-# 4. Instantiate the auth component
-config = AuthConfig(secret_key="my-super-secret-key", algorithm="HS256")
+### 2. Implement the `UserLoader` and `IdentityLoader` protocols
+
+FAuth calls these two async callbacks to retrieve users from your data source:
+
+```python
+# auth.py
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from fauth import TokenPayload
+from .models import User
+
+
+async def load_user(payload: TokenPayload, session: AsyncSession) -> User | None:
+    """Resolve a user from a decoded JWT (used by require_user / require_roles)."""
+    result = await session.execute(select(User).where(User.id == payload.sub))
+    return result.scalar_one_or_none()
+
+
+async def load_identity(identifier: str, session: AsyncSession) -> User | None:
+    """Resolve a user by username/email (used by authenticate() on login)."""
+    result = await session.execute(select(User).where(User.username == identifier))
+    return result.scalar_one_or_none()
+```
+
+### 3. Create the `AuthProvider`
+
+```python
+# auth.py (continued)
+from fauth import AuthConfig, AuthProvider
+
+config = AuthConfig(secret_key="change-me-in-production")
+
 auth: AuthProvider[User] = AuthProvider(
     config=config,
     user_loader=load_user,
     identity_loader=load_identity,
 )
+```
 
-# --- Routes ---
+`AuthConfig` reads values from environment variables out of the box (via `pydantic-settings`):
+
+```bash
+export SECRET_KEY="my-production-secret"
+export ACCESS_TOKEN_EXPIRE_MINUTES=30
+```
+
+```python
+config = AuthConfig()  # reads SECRET_KEY from environment
+```
+
+### 4. Wire it into FastAPI
+
+```python
+# main.py
+from fastapi import FastAPI, Depends
+from fastapi.security import OAuth2PasswordRequestForm
+
+from .auth import auth
+from .models import User
+
+app = FastAPI()
+
 
 @app.post("/login")
-async def login(username: str, password: str):
-    # 5. Verify credentials, then issue tokens
-    user = await auth.authenticate(username, password)
+async def login(form: OAuth2PasswordRequestForm = Depends()):
+    user = await auth.authenticate(form.username, form.password)
     return await auth.login(sub=user.id)
+
 
 @app.get("/me")
 async def get_me(user: User = Depends(auth.require_user)):
-    # 6. `auth.require_user` secures the endpoint automatically
-    return {"message": f"Hello {user.username}"}
+    return {"id": user.id, "username": user.username}
+
 
 @app.get("/admin")
-async def get_admin_data(user: User = Depends(auth.require_roles(["admin"]))):
-    # 7. `auth.require_roles` enforces RBAC with list of roles
-    return {"secret_data": "Top secret admin info"}
+async def admin_panel(user: User = Depends(auth.require_roles(["admin"]))):
+    return {"message": f"Welcome, {user.username}"}
+```
 
-# --- Securing Multiple Routes ---
+- `/login` — verifies credentials via `authenticate()`, then issues access + refresh tokens via `login()`.
+- `/me` — protected: requests without a valid `Bearer` token receive `401 Unauthorized`.
+- `/admin` — protected and role-gated: users without the `admin` role receive `403 Forbidden`.
 
-# 8. Use `SecureAPIRouter` to protect an entire group of routes.
-# Any route added to this router will require an active user automatically.
-# This also enables the "Authorize" button in Swagger UI!
-secure_router = SecureAPIRouter(auth_provider=auth, prefix="/internal", tags=["Protected"])
+---
+
+## Securing Multiple Routes at Once
+
+Use `SecureAPIRouter` to protect an entire group of routes without adding `Depends` to every function. It also registers the security scheme in OpenAPI, so the **Authorize** button appears in Swagger UI automatically.
+
+```python
+from fauth import SecureAPIRouter
+
+secure_router = SecureAPIRouter(auth_provider=auth, prefix="/api/v1", tags=["Protected"])
+
 
 @secure_router.get("/dashboard")
-async def get_dashboard():
-    # This endpoint is secured by FAuth without needing Depends in the signature!
-    return {"data": "Secure dashboard"}
+async def dashboard():
+    return {"data": "protected content"}
+
+
+@secure_router.get("/settings")
+async def settings():
+    return {"theme": "dark"}
+
 
 app.include_router(secure_router)
 ```
+
+---
+
+## Next Steps
+
+| Topic | Page |
+| --- | --- |
+| Full `AuthConfig` options and environment variables | [API Reference](api-reference.md) |
+| Custom field names, token payload, and refresh flow | [Authentication](authentication.md) |
+| Role and permission enforcement | [Authorization](authorization.md) |
+| Cookie-based or custom token transports | [Transports](transports.md) |
+| JWT and password hashing utilities | [Crypto Utilities](crypto.md) |
+| Structured logging with structlog | [Logging](logging.md) |
+| Error codes and exception types | [Error Handling](error-handling.md) |
