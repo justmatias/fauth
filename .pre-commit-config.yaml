@@ -5,7 +5,7 @@ repos:
       - id: validate-pyproject
 
   - repo: https://github.com/justmatias/hookpin
-    rev: v7.0.1
+    rev: v7.0.2
     hooks:
       - id: hookpin
 
