@@ -35,12 +35,11 @@ markdown_extensions:
   - tables
 
 nav:
-  - Home: index.md
   - Getting Started: getting-started.md
   - API Reference: api-reference.md
-  - Crypto Utilities: crypto.md
   - Authentication: authentication.md
   - Authorization: authorization.md
+  - Crypto Utilities: crypto.md
   - Transports: transports.md
   - Secure Router: secure-router.md
   - Logging: logging.md
