@@ -46,10 +46,10 @@ repos:
         types: [python]
         additional_dependencies:
           - pydantic==2.13.4
-          - pydantic-settings==2.14.2
+          - pydantic-settings==2.15.0
           - pytest==9.1.1
           - polyfactory==3.3.0
-          - fastapi==0.139.0
+          - fastapi==0.141.1
 
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v2.3.0
@@ -57,10 +57,10 @@ repos:
       - id: mypy
         additional_dependencies:
           - pydantic==2.13.4
-          - pydantic-settings==2.14.2
+          - pydantic-settings==2.15.0
           - pytest==9.1.1
           - polyfactory==3.3.0
-          - fastapi==0.139.0
+          - fastapi==0.141.1
           - pwdlib==0.3.0
           - pyjwt==2.13.0
 
