@@ -1,6 +1,131 @@
 # CHANGELOG
 
 
+## v0.5.8 (2026-08-09)
+
+### Bug Fixes
+
+- **deps**: Bump actions/checkout from 7.0.0 to 7.0.1
+  ([#62](https://github.com/justmatias/fauth/pull/62),
+  [`ea89760`](https://github.com/justmatias/fauth/commit/ea897608a53e6f9cace49dd860a6cba80bb92777))
+
+* fix(deps): bump actions/checkout from 7.0.0 to 7.0.1
+
+Bumps [actions/checkout](https://github.com/actions/checkout) from 7.0.0 to 7.0.1. - [Release
+  notes](https://github.com/actions/checkout/releases) -
+  [Changelog](https://github.com/actions/checkout/blob/main/CHANGELOG.md) -
+  [Commits](https://github.com/actions/checkout/compare/9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0...3d3c42e5aac5ba805825da76410c181273ba90b1)
+
+--- updated-dependencies: - dependency-name: actions/checkout dependency-version: 7.0.1
+
+dependency-type: direct:production
+
+update-type: version-update:semver-patch ...
+
+Signed-off-by: dependabot[bot] <support@github.com>
+
+* chore(config): update pre-commit hooks
+
+---------
+
+Co-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+
+Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+
+Co-authored-by: Matías Giménez <matiasgimenez.dev@gmail.com>
+
+- **deps**: Bump pypa/gh-action-pypi-publish from 1.14.0 to 1.14.1
+  ([#61](https://github.com/justmatias/fauth/pull/61),
+  [`1a9f541`](https://github.com/justmatias/fauth/commit/1a9f541868f10100c7ddb64894fb50ba7ba3c211))
+
+* fix(deps): bump pypa/gh-action-pypi-publish from 1.14.0 to 1.14.1
+
+Bumps [pypa/gh-action-pypi-publish](https://github.com/pypa/gh-action-pypi-publish) from 1.14.0 to
+  1.14.1. - [Release notes](https://github.com/pypa/gh-action-pypi-publish/releases) -
+  [Commits](https://github.com/pypa/gh-action-pypi-publish/compare/cef221092ed1bacb1cc03d23a2d87d1d172e277b...ba38be9e461d3875417946c167d0b5f3d385a247)
+
+--- updated-dependencies: - dependency-name: pypa/gh-action-pypi-publish dependency-version: 1.14.1
+
+dependency-type: direct:production
+
+update-type: version-update:semver-patch ...
+
+Signed-off-by: dependabot[bot] <support@github.com>
+
+* chore(config): update pre-commit hooks
+
+---------
+
+Co-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+
+Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+
+- **deps**: Bump snyk/actions/python from 8e119fbb6c251787721d34ba683ed48eba792766 to
+  12140f4059e244892ae643824a95459a102120dd ([#63](https://github.com/justmatias/fauth/pull/63),
+  [`a6df6f5`](https://github.com/justmatias/fauth/commit/a6df6f578b8a6bcbe8ddf9a57071ab6daad7022a))
+
+* fix(deps): bump snyk/actions/python
+
+Bumps [snyk/actions/python](https://github.com/snyk/actions) from
+  8e119fbb6c251787721d34ba683ed48eba792766 to 12140f4059e244892ae643824a95459a102120dd. - [Release
+  notes](https://github.com/snyk/actions/releases) -
+  [Commits](https://github.com/snyk/actions/compare/8e119fbb6c251787721d34ba683ed48eba792766...12140f4059e244892ae643824a95459a102120dd)
+
+--- updated-dependencies: - dependency-name: snyk/actions/python dependency-version:
+  12140f4059e244892ae643824a95459a102120dd
+
+dependency-type: direct:production ...
+
+Signed-off-by: dependabot[bot] <support@github.com>
+
+* chore(config): update pre-commit hooks
+
+---------
+
+Co-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+
+Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+
+Co-authored-by: Matías Giménez <matiasgimenez.dev@gmail.com>
+
+### Chores
+
+- Update pre commit hooks
+  ([`9826be0`](https://github.com/justmatias/fauth/commit/9826be0930f632f834286da1ecda2637432a21ff))
+
+- Update semantic release commit message
+  ([`8462aca`](https://github.com/justmatias/fauth/commit/8462aca9509ec43eab299265a1371b4f9091ccc2))
+
+- Update uv version
+  ([`8a8cb59`](https://github.com/justmatias/fauth/commit/8a8cb594dcfa00cef37f556ee75123d1fafbb6d9))
+
+- **deps**: Bump cryptography from 49.0.0 to 50.0.0
+  ([#64](https://github.com/justmatias/fauth/pull/64),
+  [`51877dd`](https://github.com/justmatias/fauth/commit/51877dda63a3fe1283a9bcef96981c6ff52584ad))
+
+* chore(deps): bump cryptography from 49.0.0 to 50.0.0
+
+Bumps [cryptography](https://github.com/pyca/cryptography) from 49.0.0 to 50.0.0. -
+  [Changelog](https://github.com/pyca/cryptography/blob/main/CHANGELOG.rst) -
+  [Commits](https://github.com/pyca/cryptography/compare/49.0.0...50.0.0)
+
+--- updated-dependencies: - dependency-name: cryptography dependency-version: 50.0.0
+
+dependency-type: indirect ...
+
+Signed-off-by: dependabot[bot] <support@github.com>
+
+* chore(config): update pre-commit hooks
+
+---------
+
+Co-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+
+Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+
+Co-authored-by: Matías Giménez <matiasgimenez.dev@gmail.com>
+
+
 ## v0.5.7 (2026-07-09)
 
 ### Bug Fixes
@@ -216,6 +341,9 @@ Co-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.c
 
 Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
 
+- **release**: Release version 0.5.7
+  ([`9c9385d`](https://github.com/justmatias/fauth/commit/9c9385d6b19d09a7575355a47b54542bf810748e))
+
 ### Documentation
 
 - Replace redirect index page with comprehensive Getting Started documentation
@@ -258,6 +386,9 @@ Co-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.c
 
 Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
 
+- **release**: Release version 0.5.6
+  ([`bb392db`](https://github.com/justmatias/fauth/commit/bb392dbf01b7c8da8e71ea758d1bb6271fd3934c))
+
 
 ## v0.5.5 (2026-05-02)
 
@@ -274,6 +405,9 @@ Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.co
 
 - Restructure documentation ([#47](https://github.com/justmatias/fauth/pull/47),
   [`e96d2c1`](https://github.com/justmatias/fauth/commit/e96d2c1f14fabd590a9bf2578123828ab99a54c1))
+
+- **release**: Release version 0.5.5
+  ([`c577b7c`](https://github.com/justmatias/fauth/commit/c577b7cb0decbb1a98506506ec3da9bfefbd5007))
 
 ### Refactoring
 
@@ -305,6 +439,11 @@ Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.co
 
 Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
 
+### Chores
+
+- **release**: Release version 0.5.4
+  ([`e55bde5`](https://github.com/justmatias/fauth/commit/e55bde54198b8eb14ac05dd6ec526da930616abb))
+
 
 ## v0.5.3 (2026-04-22)
 
@@ -312,6 +451,11 @@ Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.co
 
 - **docs**: Update docs based on latest updates
   ([`90fd43f`](https://github.com/justmatias/fauth/commit/90fd43f0ffef6ddb0f296ba13936a84acda89149))
+
+### Chores
+
+- **release**: Release version 0.5.3
+  ([`1e9c228`](https://github.com/justmatias/fauth/commit/1e9c22844da1d591b001127432eef07c5454fce6))
 
 
 ## v0.5.2 (2026-04-22)
@@ -322,6 +466,11 @@ Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.co
   ([#42](https://github.com/justmatias/fauth/pull/42),
   [`ee20e8a`](https://github.com/justmatias/fauth/commit/ee20e8a1fdd708bd59b0ff1ace2d36a84c2324f5))
 
+### Chores
+
+- **release**: Release version 0.5.2
+  ([`f30ce4c`](https://github.com/justmatias/fauth/commit/f30ce4cda07f74700451b92ddb5d3dda54502c95))
+
 
 ## v0.5.1 (2026-04-22)
 
@@ -331,8 +480,18 @@ Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.co
   ([#41](https://github.com/justmatias/fauth/pull/41),
   [`b9850d8`](https://github.com/justmatias/fauth/commit/b9850d84d8f17ef8cc3af33287077436808fc187))
 
+### Chores
+
+- **release**: Release version 0.5.1
+  ([`c528de9`](https://github.com/justmatias/fauth/commit/c528de9a314929691204c702085fd10c7afc474f))
+
 
 ## v0.5.0 (2026-04-21)
+
+### Chores
+
+- **release**: Release version 0.5.0
+  ([`6f1bffe`](https://github.com/justmatias/fauth/commit/6f1bffe0b2a7970b146672fb71860aaa57344fd2))
 
 ### Features
 
@@ -348,6 +507,11 @@ Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.co
 - Update require_roles to support singular role fields and enum types with regression tests
   ([#39](https://github.com/justmatias/fauth/pull/39),
   [`0d2c646`](https://github.com/justmatias/fauth/commit/0d2c646729fcfffe9e10b047e117636b97530620))
+
+### Chores
+
+- **release**: Release version 0.4.2
+  ([`ba65053`](https://github.com/justmatias/fauth/commit/ba650538bac05a361fb33e989060ec4f67ad508a))
 
 
 ## v0.4.1 (2026-04-18)
@@ -408,6 +572,9 @@ Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.co
 - Remove pre-commit autoupdate workflow ([#36](https://github.com/justmatias/fauth/pull/36),
   [`7022909`](https://github.com/justmatias/fauth/commit/7022909b390658add76bb9bf767b0fdf9fcf4657))
 
+- **release**: Release version 0.4.1
+  ([`a210fc3`](https://github.com/justmatias/fauth/commit/a210fc3a408b1407ed2a9980f02490a921901f29))
+
 
 ## v0.4.0 (2026-04-15)
 
@@ -415,6 +582,9 @@ Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.co
 
 - Add pragma no cover to auth middleware fallback paths
   ([`cd3c090`](https://github.com/justmatias/fauth/commit/cd3c09037e7459126c01310c34b09ea2e7f4ece0))
+
+- **release**: Release version 0.4.0
+  ([`0b76965`](https://github.com/justmatias/fauth/commit/0b7696588dfd9f737122c9dac4419ff1c27b537e))
 
 ### Features
 
@@ -428,6 +598,11 @@ Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.co
 
 - Add py.typed marker to enable type checking support
   ([`1787519`](https://github.com/justmatias/fauth/commit/1787519027c7dfd6e57e1fddad45b7cdffe97e48))
+
+### Chores
+
+- **release**: Release version 0.3.1
+  ([`9d91fcf`](https://github.com/justmatias/fauth/commit/9d91fcf6dd41c3583ab38217df2815124731727b))
 
 
 ## v0.3.0 (2026-04-15)
@@ -503,6 +678,9 @@ dependency-type: direct:development ...
 
 Signed-off-by: dependabot[bot] <support@github.com>
 
+- **release**: Release version 0.3.0
+  ([`9ae98de`](https://github.com/justmatias/fauth/commit/9ae98ded945d2f6f32b64fedf897dde3970ec02d))
+
 ### Features
 
 - Implement AuthMiddleware for JWT-based request authentication and user loading
@@ -558,6 +736,9 @@ dependency-type: indirect ...
 
 Signed-off-by: dependabot[bot] <support@github.com>
 
+- **release**: Release version 0.2.2
+  ([`1b50781`](https://github.com/justmatias/fauth/commit/1b50781d38a30dedc65cd3c91dbc5d909a9e5dd0))
+
 
 ## v0.2.1 (2026-04-03)
 
@@ -570,6 +751,9 @@ Signed-off-by: dependabot[bot] <support@github.com>
 
 - **config**: Merge with main
   ([`d8caae2`](https://github.com/justmatias/fauth/commit/d8caae2b3e357fcc2b3bc5f78c2929c1d0b12427))
+
+- **release**: Release version 0.2.1
+  ([`4025066`](https://github.com/justmatias/fauth/commit/40250660be7da05ed884c5451396afbbc1ed971f))
 
 
 ## v0.2.0 (2026-04-02)
@@ -593,6 +777,9 @@ Signed-off-by: dependabot[bot] <support@github.com>
 - **docs**: Update project dependencies in pyproject.toml
   ([`d49cdbf`](https://github.com/justmatias/fauth/commit/d49cdbf979d63a6b2fbe895c43984c96ae4b721d))
 
+- **release**: Release version 0.2.0
+  ([`903b2ed`](https://github.com/justmatias/fauth/commit/903b2edf1b31351569e20e34ea91a2f6231af559))
+
 ### Features
 
 - **config**: Implement structured logging utility using structlog
@@ -614,6 +801,9 @@ Signed-off-by: dependabot[bot] <support@github.com>
 - **docs**: Update readme
   ([`892ea31`](https://github.com/justmatias/fauth/commit/892ea31dcae32aabd7f3d935a2579a1809ed12e4))
 
+- **release**: Release version 0.1.2
+  ([`56ad879`](https://github.com/justmatias/fauth/commit/56ad879eb75bf9c5e1199e8715dc6310981c9225))
+
 
 ## v0.1.1 (2026-04-01)
 
@@ -626,6 +816,9 @@ Signed-off-by: dependabot[bot] <support@github.com>
 
 - **config**: Update pre-commit hooks
   ([`8f9c9d8`](https://github.com/justmatias/fauth/commit/8f9c9d854a83913b0860b0e9dc2f12ed6f386ef7))
+
+- **release**: Release version 0.1.1
+  ([`5663053`](https://github.com/justmatias/fauth/commit/5663053b4c5d7ffbeea23a91f8a70dc45d2d4a05))
 
 
 ## v0.1.0 (2026-03-29)
@@ -680,6 +873,9 @@ Signed-off-by: dependabot[bot] <support@github.com>
 - **config**: Update requirements.txt
   ([`ec11b90`](https://github.com/justmatias/fauth/commit/ec11b90eb30ab24a5b384c5b9662077fea46d903))
 
+- **release**: Release version 0.1.0
+  ([`bc7b7d3`](https://github.com/justmatias/fauth/commit/bc7b7d3dd2aa2fbdd702664900241cf770d792f9))
+
 ### Features
 
 - Implement core authentication logic, transports, and testing utilities
@@ -702,3 +898,6 @@ Signed-off-by: dependabot[bot] <support@github.com>
 - **config**: Initialize new fauth project with core structure, dependency management, CI/CD, and
   code quality tooling
   ([`0fe70cf`](https://github.com/justmatias/fauth/commit/0fe70cf7e453e404db44b64828ce5dc5bc440f73))
+
+- **release**: Release version 0.0.0
+  ([`7ebb795`](https://github.com/justmatias/fauth/commit/7ebb7958314c425b70eb0005a05927ebb80100a7))
