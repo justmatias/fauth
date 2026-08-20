@@ -8,7 +8,7 @@ inputs:
   uv-version:
     description: 'uv version to install'
     required: false
-    default: '0.9.11'
+    default: '0.12.3'
   install-dependencies:
     description: 'Whether to run uv sync after setup'
     required: false
