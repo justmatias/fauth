@@ -1,6 +1,37 @@
 # CHANGELOG
 
 
+## v0.5.9 (2026-08-20)
+
+### Bug Fixes
+
+- **deps**: Bump pypa/gh-action-pypi-publish from 1.14.1 to 1.14.2
+  ([#65](https://github.com/justmatias/fauth/pull/65),
+  [`51e84b6`](https://github.com/justmatias/fauth/commit/51e84b6cd38c20fdec2ab8a900e600add1a046b6))
+
+* fix(deps): bump pypa/gh-action-pypi-publish from 1.14.1 to 1.14.2
+
+Bumps [pypa/gh-action-pypi-publish](https://github.com/pypa/gh-action-pypi-publish) from 1.14.1 to
+  1.14.2. - [Release notes](https://github.com/pypa/gh-action-pypi-publish/releases) -
+  [Commits](https://github.com/pypa/gh-action-pypi-publish/compare/ba38be9e461d3875417946c167d0b5f3d385a247...dc37677b2e1c63e2034f94d8a5b11f265b73ba33)
+
+--- updated-dependencies: - dependency-name: pypa/gh-action-pypi-publish dependency-version: 1.14.2
+
+dependency-type: direct:production
+
+update-type: version-update:semver-patch ...
+
+Signed-off-by: dependabot[bot] <support@github.com>
+
+* chore(config): update pre-commit hooks
+
+---------
+
+Co-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+
+Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+
+
 ## v0.5.8 (2026-08-09)
 
 ### Bug Fixes
