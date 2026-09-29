@@ -25,7 +25,7 @@ jobs:
         run: uv export --format requirements-txt --output-file requirements.txt
 
       - name: Run Snyk Open Source
-        uses: snyk/actions/python@12140f4059e244892ae643824a95459a102120dd # master
+        uses: snyk/actions/python@b075801f26076be9bb50521154cafab73f44da0c # master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
