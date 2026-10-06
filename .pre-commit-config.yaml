@@ -40,7 +40,7 @@ repos:
         args: ['-r', '-lll']
 
   - repo: https://github.com/pylint-dev/pylint
-    rev: v4.1.1
+    rev: v4.1.2
     hooks:
       - id: pylint
         types: [python]
@@ -52,7 +52,7 @@ repos:
           - fastapi==0.141.1
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v2.3.1
+    rev: v2.4.0
     hooks:
       - id: mypy
         additional_dependencies:
