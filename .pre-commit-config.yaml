@@ -62,7 +62,7 @@ repos:
           - polyfactory==3.3.0
           - fastapi==0.141.1
           - pwdlib==0.3.0
-          - pyjwt==2.13.0
+          - pyjwt==2.15.0
 
   - repo: https://github.com/hadolint/hadolint
     rev: v2.15.1
