@@ -7,6 +7,7 @@ from fastapi import Request, Response
 from fastapi.security.base import SecurityBase
 from fauth import Transport
 
+
 class CookieTransport:
     async def __call__(self, request: Request) -> str | None:
         return request.cookies.get("auth_token")
@@ -20,6 +21,7 @@ class CookieTransport:
     def get_security_scheme(self) -> SecurityBase:
         # Return your custom OpenAPI scheme
         ...
+
 
 # Use it
 auth = AuthProvider(config=config, user_loader=load_user, transport=CookieTransport())

@@ -1,6 +1,6 @@
 import datetime
 import enum
-from typing import Any
+from typing import Annotated, Any
 from uuid import UUID, uuid4
 
 import pytest
@@ -98,31 +98,31 @@ def fastapi_app(provider: AuthProvider[DummyUser]) -> FastAPI:
 
     @app.get("/user")
     def get_user(
-        user: DummyUser = Depends(provider.require_user),
+        user: Annotated[DummyUser, Depends(provider.require_user)],
     ) -> dict[str, Any]:
         return {"id": str(user.id_)}
 
     @app.get("/admin")
     def get_admin(
-        user: DummyUser = Depends(provider.require_roles(["admin"])),
+        user: Annotated[DummyUser, Depends(provider.require_roles(["admin"]))],
     ) -> dict[str, Any]:
         return {"id": str(user.id_)}
 
     @app.get("/writer")
     def get_writer(
-        user: DummyUser = Depends(provider.require_permissions(["write"])),
+        user: Annotated[DummyUser, Depends(provider.require_permissions(["write"]))],
     ) -> dict[str, Any]:
         return {"id": str(user.id_)}
 
     @app.get("/active-user")
     def get_active_user(
-        user: DummyUser = Depends(provider.require_active_user),
+        user: Annotated[DummyUser, Depends(provider.require_active_user)],
     ) -> dict[str, Any]:  # pragma: no cover
         return {"id": str(user.id_)}
 
     @app.get("/token-payload")
     def get_token_payload(
-        payload: TokenPayload = Depends(provider.get_token_payload),
+        payload: Annotated[TokenPayload, Depends(provider.get_token_payload)],
     ) -> dict[str, Any]:
         return {"sub": payload.sub}
 

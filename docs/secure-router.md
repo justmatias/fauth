@@ -11,14 +11,17 @@ secure_router = SecureAPIRouter(
     tags=["Protected"],
 )
 
+
 @secure_router.get("/dashboard")
 async def dashboard():
     # Automatically secured — no Depends needed in the function signature
     return {"data": "protected content"}
 
+
 @secure_router.get("/settings")
 async def settings():
     return {"theme": "dark"}
+
 
 app.include_router(secure_router)
 ```
