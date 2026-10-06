@@ -85,9 +85,11 @@ Your application implements this to tell FAuth how to fetch a user from a decode
 ```python
 from fauth import TokenPayload
 
+
 # As a plain function
 async def load_user(token_payload: TokenPayload) -> User | None:
     return await db.get_user(token_payload.sub)
+
 
 # Or as a callable class
 class MyUserLoader:
@@ -106,6 +108,7 @@ Used by `authenticate()` to look up a user by an identifier (username, email, et
 # As a plain function
 async def load_identity(identifier: str) -> User | None:
     return await db.get_user_by_username(identifier)
+
 
 # Or as a callable class
 class MyIdentityLoader:
@@ -137,6 +140,6 @@ Returned by `auth.login()`:
 {
     "access_token": "eyJhbGciOiJIUzI1NiIs...",
     "refresh_token": "eyJhbGciOiJIUzI1NiIs...",
-    "token_type": "bearer"
+    "token_type": "bearer",
 }
 ```
