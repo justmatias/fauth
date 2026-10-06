@@ -138,7 +138,9 @@ Use `SecureAPIRouter` to protect an entire group of routes without adding `Depen
 ```python
 from fauth import SecureAPIRouter
 
-secure_router = SecureAPIRouter(auth_provider=auth, prefix="/api/v1", tags=["Protected"])
+secure_router = SecureAPIRouter(
+    auth_provider=auth, prefix="/api/v1", tags=["Protected"]
+)
 
 
 @secure_router.get("/dashboard")
