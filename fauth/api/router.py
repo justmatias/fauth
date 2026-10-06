@@ -20,11 +20,12 @@ class SecureAPIRouter(APIRouter):
         dependencies: list[Any] = list(kwargs.pop("dependencies", []))
 
         # Add security scheme for OpenAPI documentation
+        # and the user authentication dependency
         security_scheme = auth_provider.get_security_scheme()
-        dependencies.append(Depends(security_scheme))  # type: ignore[arg-type]
-
-        # Add user authentication dependency
-        dependencies.append(Depends(auth_provider.require_active_user))
+        dependencies.extend((
+            Depends(security_scheme),  # type: ignore[arg-type]
+            Depends(auth_provider.require_active_user),
+        ))
 
         kwargs["dependencies"] = dependencies
 

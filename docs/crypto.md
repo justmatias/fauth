@@ -11,7 +11,7 @@ from fauth import (
     create_password_reset_token,
     create_email_verification_token,
     decode_token,
-    AuthConfig
+    AuthConfig,
 )
 
 config = AuthConfig(secret_key="my-secret")
@@ -32,9 +32,9 @@ access = create_access_token(
 
 # Decode (with optional type validation)
 payload = decode_token(access, auth_config=config, expected_type="access")
-print(payload.sub)         # "user-123"
+print(payload.sub)  # "user-123"
 print(payload.token_type)  # "access"
-print(payload.scopes)      # ["read", "write"]
+print(payload.scopes)  # ["read", "write"]
 ```
 
 ## Password Hashing
