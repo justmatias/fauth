@@ -8,19 +8,23 @@ FAuth provides a built-in `authenticate()` method on `AuthProvider` that handles
 from pydantic import BaseModel
 from fauth import AuthConfig, AuthProvider, hash_password
 
+
 class User(BaseModel):
     id: str
     username: str
     hashed_password: str
     is_active: bool = True
 
+
 # Identity loader retrieves user by username/email/etc.
 async def load_identity(identifier: str) -> User | None:
     return await db.get_user_by_username(identifier)
 
+
 # Token-based user loader (used by require_user)
 async def load_user(payload) -> User | None:
     return await db.get_user_by_id(payload.sub)
+
 
 auth = AuthProvider(
     config=AuthConfig(secret_key="my-secret"),
@@ -35,6 +39,7 @@ auth = AuthProvider(
 from fastapi import FastAPI
 
 app = FastAPI()
+
 
 @app.post("/login")
 async def login(username: str, password: str):
@@ -57,10 +62,12 @@ When your user model uses non-default attribute names, pass a `FieldNames` insta
 ```python
 from fauth import AuthProvider, FieldNames
 
+
 class User(BaseModel):
     id: str
-    pw_hash: str   # instead of hashed_password
-    active: bool    # instead of is_active
+    pw_hash: str  # instead of hashed_password
+    active: bool  # instead of is_active
+
 
 auth = AuthProvider(
     config=config,
@@ -88,9 +95,11 @@ If you need custom claims in your tokens (e.g., `tenant_id`, `organization_id`),
 ```python
 from fauth import AuthConfig, AuthProvider, TokenPayload
 
+
 class MyTokenPayload(TokenPayload):
     tenant_id: str
     plan: str = "free"
+
 
 auth = AuthProvider(
     config=AuthConfig(secret_key="my-secret"),
