@@ -1,6 +1,6 @@
 # pylint: disable=duplicate-code
 import datetime
-from typing import Any
+from typing import Annotated, Any
 from uuid import UUID, uuid4
 
 import pytest
@@ -116,7 +116,7 @@ def app_with_require_user(
 
     @_app.get("/me")
     async def me(
-        current_user: DummyUser = Depends(provider.require_user),
+        current_user: Annotated[DummyUser, Depends(provider.require_user)],
     ) -> dict[str, Any]:
         return {"id": str(current_user.id_)}
 

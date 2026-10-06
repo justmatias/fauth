@@ -40,6 +40,7 @@ from pydantic import BaseModel
 from fastapi import FastAPI, Depends
 from fauth import AuthConfig, AuthProvider, TokenPayload, hash_password
 
+
 class User(BaseModel):
     id: str
     username: str
@@ -48,25 +49,38 @@ class User(BaseModel):
     roles: list[str] = []
     permissions: list[str] = []
 
+
 DB: dict[str, User] = {
-    "user-123": User(id="user-123", username="alice", hashed_password=hash_password("s3cret"), roles=["admin"]),
+    "user-123": User(
+        id="user-123",
+        username="alice",
+        hashed_password=hash_password("s3cret"),
+        roles=["admin"],
+    ),
 }
+
 
 async def load_user(payload: TokenPayload) -> User | None:
     return DB.get(payload.sub)
 
+
 async def load_identity(identifier: str) -> User | None:
     return next((u for u in DB.values() if u.username == identifier), None)
 
+
 config = AuthConfig(secret_key="my-super-secret-key")
-auth: AuthProvider[User] = AuthProvider(config=config, user_loader=load_user, identity_loader=load_identity)
+auth: AuthProvider[User] = AuthProvider(
+    config=config, user_loader=load_user, identity_loader=load_identity
+)
 
 app = FastAPI()
+
 
 @app.post("/login")
 async def login(username: str, password: str):
     user = await auth.authenticate(username, password)
     return await auth.login(sub=user.id)
+
 
 @app.get("/me")
 async def get_me(user: User = Depends(auth.require_user)):
