@@ -91,7 +91,7 @@ format.indent-style = "space"
 format.quote-style = "double"
 format.line-ending = "auto"
 format.skip-magic-trailing-comma = false
-ignore = ["UP046", "PLC0105", "B008"]
+lint.ignore = ["UP046", "PLC0105", "B008"]
 
 ##################################
 # mypy configuration             #
